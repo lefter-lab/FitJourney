@@ -1,0 +1,7 @@
+Practical web development exam
+▪ Implementing a simple web application using
+Spring Framework
+▪ Submitted as a GitHub repository
+▪ Solutions are evaluated by hand after the exam
+▪ This is a project-based assessment, similar to
+real-world development
