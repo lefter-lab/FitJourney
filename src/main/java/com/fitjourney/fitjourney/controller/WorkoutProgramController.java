@@ -46,5 +46,11 @@ public class WorkoutProgramController {
 
         return "redirect:/dashboard";
     }
+
+    @GetMapping("/all")
+    public String getAllPrograms(Model model) {
+        model.addAttribute("programs", workoutProgramService.getAllPrograms());
+        return "programs/programs-all";
+    }
 }
 

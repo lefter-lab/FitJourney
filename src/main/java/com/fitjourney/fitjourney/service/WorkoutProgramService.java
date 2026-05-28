@@ -4,6 +4,7 @@ import com.fitjourney.fitjourney.dto.WorkoutProgramDto;
 import com.fitjourney.fitjourney.entity.User;
 import com.fitjourney.fitjourney.entity.WorkoutProgram;
 import com.fitjourney.fitjourney.repository.WorkoutProgramRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,10 @@ public class WorkoutProgramService {
         program.setActive(true);
 
         workoutProgramRepository.save(program);
+    }
+
+    public List<WorkoutProgram> getAllPrograms() {
+        return workoutProgramRepository.findAll();
     }
 }
 
