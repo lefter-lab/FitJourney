@@ -87,4 +87,10 @@ public class WorkoutProgramController {
         workoutProgramService.updateProgram(id, dto);
         return "redirect:/programs/all";
     }
+
+    @PostMapping("/{id}/deactivate")
+    public String deactivateProgram(@PathVariable UUID id) {
+        workoutProgramService.deactivateProgram(id);
+        return "redirect:/programs/all";
+    }
 }

@@ -47,4 +47,10 @@ public class WorkoutProgramService {
         program.setPrice(BigDecimal.valueOf(dto.getPrice()));
         workoutProgramRepository.save(program);
     }
+
+    public void deactivateProgram(UUID id) {
+        WorkoutProgram program = findById(id);
+        program.setActive(false);
+        workoutProgramRepository.save(program);
+    }
 }

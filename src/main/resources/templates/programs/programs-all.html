@@ -94,10 +94,14 @@
                 <td th:text="${program.difficulty}"></td>
                 <td th:text="${program.durationWeeks}"></td>
                 <td th:text="'$' + ${program.price}"></td>
-                <td><a th:href="@{/programs/{id}/edit(id=${program.id})}">Edit</a></td>
+                <td><a th:href="@{/programs/{id}/edit(id=${program.id})}">Edit</a>
+                    <form th:action="@{/programs/{id}/deactivate(id=${program.id})}"
+                          method="post" style="display:inline;">
+                        <button type="submit">Deactivate</button>
+                    </form>
+                </td>
             </tr>
         </tbody>
     </table>
 </body>
 </html>
-
