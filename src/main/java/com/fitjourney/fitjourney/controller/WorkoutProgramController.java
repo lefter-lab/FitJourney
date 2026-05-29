@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
+import com.fitjourney.fitjourney.entity.WorkoutProgram;
+import org.springframework.web.bind.annotation.PathVariable;
+import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
@@ -52,5 +55,36 @@ public class WorkoutProgramController {
         model.addAttribute("programs", workoutProgramService.getAllPrograms());
         return "programs/programs-all";
     }
-}
 
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable UUID id, Model model) {
+        WorkoutProgram program = workoutProgramService.findById(id);
+        WorkoutProgramDto dto = new WorkoutProgramDto();
+        dto.setName(program.getTitle());
+        dto.setDescription(program.getDescription());
+        dto.setDifficultyLevel(program.getDifficulty());
+        dto.setDurationWeeks(program.getDurationWeeks());
+        dto.setPrice(program.getPrice().doubleValue());
+
+        model.addAttribute("programDto", dto);
+        model.addAttribute("levels", DifficultyLevel.values());
+        model.addAttribute("programId", program.getId());
+
+        return "programs/program-edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String editProgram(@PathVariable UUID id,
+                              @Valid @ModelAttribute("programDto") WorkoutProgramDto dto,
+                              BindingResult bindingResult,
+                              Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("levels", DifficultyLevel.values());
+            model.addAttribute("programId", id);
+            return "programs/program-edit";
+        }
+
+        workoutProgramService.updateProgram(id, dto);
+        return "redirect:/programs/all";
+    }
+}

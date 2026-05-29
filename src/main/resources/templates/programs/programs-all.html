@@ -85,6 +85,7 @@
                 <th>Difficulty</th>
                 <th>Duration (weeks)</th>
                 <th>Price</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -93,6 +94,7 @@
                 <td th:text="${program.difficulty}"></td>
                 <td th:text="${program.durationWeeks}"></td>
                 <td th:text="'$' + ${program.price}"></td>
+                <td><a th:href="@{/programs/{id}/edit(id=${program.id})}">Edit</a></td>
             </tr>
         </tbody>
     </table>
