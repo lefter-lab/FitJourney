@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Enrollments - FitJourney</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .actions {
+            margin-bottom: 20px;
+        }
+        .actions a {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .actions a:hover {
+            background-color: #0056b3;
+        }
+        .actions a.secondary {
+            background-color: #6c757d;
+        }
+        .actions a.secondary:hover {
+            background-color: #5a6268;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .no-enrollments {
+            padding: 30px;
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+        }
+        .progress-form {
+            display: inline;
+        }
+        .progress-form input {
+            width: 70px;
+            padding: 6px;
+            margin-right: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .progress-form button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .progress-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Enrollments</h1>
+
+    <div class="actions">
+        <a href="/programs/all">Browse Programs</a>
+        <a href="/dashboard" class="secondary">Back to Dashboard</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(enrollments)}" class="no-enrollments">
+        <p>No enrollments yet</p>
+    </div>
+
+    <table th:unless="${#lists.isEmpty(enrollments)}">
+        <thead>
+            <tr>
+                <th>Program Name</th>
+                <th>Difficulty</th>
+                <th>Progress (%)</th>
+                <th>Update Progress</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="enrollment : ${enrollments}">
+                <td th:text="${enrollment.workoutProgram.title}"></td>
+                <td th:text="${enrollment.workoutProgram.difficulty}"></td>
+                <td th:text="${enrollment.progressPercentage}"></td>
+                <td>
+                    <form th:action="@{/enrollments/{id}/progress(id=${enrollment.id})}"
+                          method="post" class="progress-form">
+                        <input type="number" name="percentage" min="0" max="100"
+                               th:value="${enrollment.progressPercentage}" />
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
+

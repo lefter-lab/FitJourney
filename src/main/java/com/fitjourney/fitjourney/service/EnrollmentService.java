@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,17 @@ public class EnrollmentService {
         enrollment.setEnrolledAt(LocalDateTime.now());
         enrollment.setStatus(EnrollmentStatus.ACTIVE);
         enrollment.setProgressPercentage(0);
+        enrollmentRepository.save(enrollment);
+    }
+
+    public List<Enrollment> getEnrollmentsByUser(User user) {
+        return enrollmentRepository.findAllByUserId(user.getId());
+    }
+
+    public void updateProgress(UUID enrollmentId, int percentage) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+            .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+        enrollment.setProgressPercentage(percentage);
         enrollmentRepository.save(enrollment);
     }
 }
