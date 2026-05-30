@@ -95,6 +95,10 @@
                 <td th:text="${program.durationWeeks}"></td>
                 <td th:text="'$' + ${program.price}"></td>
                 <td>
+                    <form th:action="@{/enrollments/{id}/enroll(id=${program.id})}"
+                          method="post" style="display:inline;">
+                        <button type="submit">Enroll</button>
+                    </form>
                     <div sec:authorize="hasRole('TRAINER')">
                         <a th:href="@{/programs/{id}/edit(id=${program.id})}">Edit</a>
                         <form th:action="@{/programs/{id}/deactivate(id=${program.id})}"
