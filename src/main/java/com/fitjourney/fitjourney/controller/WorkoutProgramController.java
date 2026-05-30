@@ -47,7 +47,7 @@ public class WorkoutProgramController {
         var user = userService.findByUsername(principal.getName());
         workoutProgramService.createProgram(dto, user);
 
-        return "redirect:/dashboard";
+        return "redirect:/programs/all";
     }
 
     @GetMapping("/all")
