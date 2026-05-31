@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +18,7 @@ public class WorkoutProgramService {
 
     private final WorkoutProgramRepository workoutProgramRepository;
 
+    @CacheEvict(value = "programs", allEntries = true)
     public void createProgram(WorkoutProgramDto dto, User creator) {
         WorkoutProgram program = new WorkoutProgram();
         program.setTitle(dto.getName());
@@ -29,6 +32,7 @@ public class WorkoutProgramService {
         workoutProgramRepository.save(program);
     }
 
+    @Cacheable("programs")
     public List<WorkoutProgram> getAllPrograms() {
         return workoutProgramRepository.findAllByActiveTrue();
     }
@@ -38,6 +42,7 @@ public class WorkoutProgramService {
             .orElseThrow(() -> new IllegalArgumentException("Program not found"));
     }
 
+    @CacheEvict(value = "programs", allEntries = true)
     public void updateProgram(UUID id, WorkoutProgramDto dto) {
         WorkoutProgram program = findById(id);
         program.setTitle(dto.getName());
@@ -48,12 +53,14 @@ public class WorkoutProgramService {
         workoutProgramRepository.save(program);
     }
 
+    @CacheEvict(value = "programs", allEntries = true)
     public void deactivateProgram(UUID id) {
         WorkoutProgram program = findById(id);
         program.setActive(false);
         workoutProgramRepository.save(program);
     }
 
+    @CacheEvict(value = "programs", allEntries = true)
     public void archiveInactivePrograms() {
         List<WorkoutProgram> programs = workoutProgramRepository.findAllByActiveTrue();
         programs.stream()
