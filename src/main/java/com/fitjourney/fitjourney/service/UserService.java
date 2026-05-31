@@ -3,6 +3,7 @@ package com.fitjourney.fitjourney.service;
 import com.fitjourney.fitjourney.dto.RegisterDto;
 import com.fitjourney.fitjourney.entity.User;
 import com.fitjourney.fitjourney.enums.UserRole;
+import com.fitjourney.fitjourney.exception.UserNotFoundException;
 import com.fitjourney.fitjourney.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -42,7 +43,8 @@ public class UserService implements UserDetailsService {
     }
 
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElse(null);
+        return userRepository.findByUsername(username)
+            .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
     }
 
     @Override

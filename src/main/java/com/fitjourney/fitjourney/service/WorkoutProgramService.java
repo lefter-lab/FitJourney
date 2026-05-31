@@ -3,6 +3,7 @@ package com.fitjourney.fitjourney.service;
 import com.fitjourney.fitjourney.dto.WorkoutProgramDto;
 import com.fitjourney.fitjourney.entity.User;
 import com.fitjourney.fitjourney.entity.WorkoutProgram;
+import com.fitjourney.fitjourney.exception.ProgramNotFoundException;
 import com.fitjourney.fitjourney.repository.WorkoutProgramRepository;
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,7 +40,7 @@ public class WorkoutProgramService {
 
     public WorkoutProgram findById(UUID id) {
         return workoutProgramRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Program not found"));
+            .orElseThrow(() -> new ProgramNotFoundException("Program not found with id: " + id));
     }
 
     @CacheEvict(value = "programs", allEntries = true)
