@@ -38,4 +38,14 @@ public class EnrollmentService {
         enrollment.setProgressPercentage(percentage);
         enrollmentRepository.save(enrollment);
     }
+
+    public void updateExpiredEnrollments() {
+        List<Enrollment> enrollments = enrollmentRepository.findAll();
+        enrollments.stream()
+            .filter(e -> e.getProgressPercentage() >= 100)
+            .forEach(e -> {
+                e.setStatus(EnrollmentStatus.COMPLETED);
+                enrollmentRepository.save(e);
+            });
+    }
 }

@@ -53,4 +53,14 @@ public class WorkoutProgramService {
         program.setActive(false);
         workoutProgramRepository.save(program);
     }
+
+    public void archiveInactivePrograms() {
+        List<WorkoutProgram> programs = workoutProgramRepository.findAllByActiveTrue();
+        programs.stream()
+            .filter(p -> p.getDurationWeeks() < 1)
+            .forEach(p -> {
+                p.setActive(false);
+                workoutProgramRepository.save(p);
+            });
+    }
 }
