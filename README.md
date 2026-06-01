@@ -1,101 +1,102 @@
 # 🏋️ FitJourney
-
-A fitness and workout tracking platform built with Spring Boot, where trainers publish workout programs and users enroll, track progress, and leave reviews.
-
----
+A fitness and workout tracking platform built with Spring Boot,
+where trainers publish workout programs and users enroll and track progress.
 
 ## Tech Stack
-
 | Layer | Technology |
-|-------|-----------|
+|---|---|
 | Language | Java 17 |
 | Framework | Spring Boot 3.4.0 |
 | Build Tool | Maven |
 | Database | MySQL |
-| ORM | Spring Data JPA |
+| ORM | Spring Data JPA / Hibernate |
 | Frontend | Thymeleaf + HTML/CSS |
-| Security | Session-based authentication |
-| Password Hashing | BCrypt |
-| Scheduling | Spring `@Scheduled` |
-| Caching | Spring `@Cacheable` |
+| Security | Spring Security (BCrypt) |
+| Scheduling | Spring @Scheduled |
+| Caching | Spring @Cacheable |
 | Version Control | Git / GitHub |
 
----
-
 ## Features
-
-### Authentication & Authorization
-- User registration with hashed passwords (BCrypt)
-- Session-based login (stores `user_id` in session)
-- Role-based access control: `GUEST`, `USER`, `TRAINER`, `ADMIN`
-
-### Workout Programs
-- Trainers can create, edit, and deactivate workout programs
-- Programs have difficulty levels, duration (weeks), and price
-- Active/inactive status management
+- User registration and login with BCrypt password hashing
+- Role-based access control: USER, TRAINER, ADMIN
+- Trainers can create, edit and deactivate workout programs
+- Users can enroll in workout programs
+- Users can track and update their enrollment progress
 - Cached program listings for performance
-
-### Enrollments
-- Users can enroll in available workout programs
-- Track progress percentage per enrollment
-- View all personal enrollments with status
-
-### Reviews
-- Users can leave a rating and comment on enrolled programs
-- Reviews displayed on program detail page
-
-### Admin
-- View and manage all users
-- Change user roles
-
-### Scheduling
-- Daily cron job archives inactive programs
-- Every 10 minutes: updates expired enrollments
-
----
+- Scheduled tasks running automatically in the background
 
 ## Functionalities
-
 | # | Functionality | Method | Endpoint | Role |
-|---|--------------|--------|----------|------|
-| 1 | Create workout program | POST | `/programs` | TRAINER |
-| 2 | Edit workout program | POST | `/programs/{id}/edit` | TRAINER |
-| 3 | Deactivate workout program | POST | `/programs/{id}/deactivate` | TRAINER |
-| 4 | Enroll in program | POST | `/enrollments` | USER |
-| 5 | Update progress | POST | `/enrollments/{id}/progress` | USER |
-| 6 | Add review | POST | `/reviews` | USER |
-
----
+|---|---|---|---|---|
+| 1 | Create workout program | POST | /programs/create | TRAINER |
+| 2 | Edit workout program | POST | /programs/{id}/edit | TRAINER |
+| 3 | Deactivate workout program | POST | /programs/{id}/deactivate | TRAINER |
+| 4 | Enroll in program | POST | /enrollments/{programId}/enroll | USER |
+| 5 | Update progress | POST | /enrollments/{id}/progress | USER |
 
 ## Domain Entities
-
 - **User** — platform account with role assignment
 - **WorkoutProgram** — fitness program created by a trainer
-- **Enrollment** — link between a user and a program, tracks progress
-- **WorkoutReview** — rating and comment left by an enrolled user
-
----
+- **Enrollment** — link between user and program, tracks progress
+- **WorkoutReview** — rating and comment left by a user
 
 ## Pages
-
 | URL | Description | Access |
-|-----|-------------|--------|
-| `/` | Home page | Public |
-| `/register` | Register new account | Guest |
-| `/login` | Login | Guest |
-| `/dashboard` | Personal dashboard | USER |
-| `/programs` | Browse all programs | Public |
-| `/programs/{id}` | Program details and reviews | Public |
-| `/programs/create` | Create new program | TRAINER |
-| `/programs/{id}/edit` | Edit program | TRAINER |
-| `/enrollments` | My enrollments | USER |
-| `/enrollments/{id}` | Enrollment details and progress | USER |
-| `/reviews/new` | Add review | USER |
-| `/admin/users` | User management | ADMIN |
-| `/profile` | View profile | USER |
-| `/profile/edit` | Edit profile | USER |
+|---|---|---|
+| / | Home page | Public |
+| /register | Register new account | Guest |
+| /login | Login | Guest |
+| /dashboard | Personal dashboard | Authenticated |
+| /programs/all | Browse all active programs | Authenticated |
+| /programs/create | Create new program | TRAINER |
+| /programs/{id}/edit | Edit program | TRAINER |
+| /enrollments/my | My enrollments | USER |
 
----
+## Scheduling
+- **Cron job** (daily at midnight) — archives inactive workout programs
+- **Fixed rate** (every 10 min) — updates completed enrollments to COMPLETED status
+
+## Caching
+- `@Cacheable("programs")` — caches the active programs list
+- `@CacheEvict` — clears cache on create, edit, deactivate and archive
+
+## Project Structure
+src/main/java/com/fitjourney/fitjourney/
+├── config/
+│   ├── PasswordEncoderConfig.java
+│   └── SecurityConfig.java
+├── controller/
+│   ├── AuthController.java
+│   ├── EnrollmentController.java
+│   ├── HomeController.java
+│   └── WorkoutProgramController.java
+├── dto/
+│   ├── RegisterDto.java
+│   └── WorkoutProgramDto.java
+├── entity/
+│   ├── Enrollment.java
+│   ├── User.java
+│   ├── WorkoutProgram.java
+│   └── WorkoutReview.java
+├── enums/
+│   ├── DifficultyLevel.java
+│   ├── EnrollmentStatus.java
+│   └── UserRole.java
+├── exception/
+│   ├── ProgramNotFoundException.java
+│   └── UserNotFoundException.java
+├── repository/
+│   ├── EnrollmentRepository.java
+│   ├── UserRepository.java
+│   ├── WorkoutProgramRepository.java
+│   └── WorkoutReviewRepository.java
+├── scheduler/
+│   └── ScheduledTasks.java
+└── service/
+├── EnrollmentService.java
+├── UserService.java
+├── WorkoutProgramService.java
+└── WorkoutReviewService.java
 
 ## Getting Started
 
@@ -105,12 +106,9 @@ A fitness and workout tracking platform built with Spring Boot, where trainers p
 - Maven 3.8+
 
 ### Setup
-
 1. Clone the repository:
-```bash
-git clone https://github.com/YOUR_USERNAME/fitjourney-app.git
-cd fitjourney-app
-```
+git clone https://github.com/lefter-lab/FitJourney.git
+cd FitJourney
 
 2. Create the database:
 ```sql
@@ -118,61 +116,15 @@ CREATE DATABASE fitjourney;
 ```
 
 3. Configure `src/main/resources/application.properties`:
-```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/fitjourney
 spring.datasource.username=YOUR_DB_USERNAME
 spring.datasource.password=YOUR_DB_PASSWORD
 spring.jpa.hibernate.ddl-auto=update
-```
 
 4. Run the application:
-```bash
 mvn spring-boot:run
-```
 
-5. Open in browser: `http://localhost:8080`
+5. Open in browser: http://localhost:8080
 
----
-
-## Project Structure
-
-```
-src/main/java/com/fitjourney/
-├── entity/
-│   ├── User.java
-│   ├── WorkoutProgram.java
-│   ├── Enrollment.java
-│   └── WorkoutReview.java
-├── repository/
-│   ├── UserRepository.java
-│   ├── WorkoutProgramRepository.java
-│   ├── EnrollmentRepository.java
-│   └── WorkoutReviewRepository.java
-├── service/
-│   ├── UserService.java
-│   ├── WorkoutProgramService.java
-│   ├── EnrollmentService.java
-│   └── WorkoutReviewService.java
-├── controller/
-│   ├── HomeController.java
-│   ├── AuthController.java
-│   ├── ProgramController.java
-│   ├── EnrollmentController.java
-│   ├── ReviewController.java
-│   └── AdminController.java
-├── dto/
-│   ├── RegisterDto.java
-│   ├── ProgramDto.java
-│   ├── EnrollmentDto.java
-│   └── ReviewDto.java
-└── exception/
-    ├── ProgramNotFoundException.java
-    ├── AlreadyEnrolledException.java
-    └── UnauthorizedAccessException.java
-```
-
----
-
-## License
-
-This project was developed as part of the **Spring Fundamentals – Regular Exam @ SoftUni, May 2026**.
+## GitHub
+https://github.com/lefter-lab/FitJourney
