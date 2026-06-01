@@ -1,114 +1,62 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Programs - FitJourney</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .actions {
-            margin-bottom: 20px;
-        }
-        .actions a {
-            display: inline-block;
-            margin-right: 10px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .actions a:hover {
-            background-color: #0056b3;
-        }
-        .actions a.secondary {
-            background-color: #6c757d;
-        }
-        .actions a.secondary:hover {
-            background-color: #5a6268;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: bold;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .no-programs {
-            padding: 30px;
-            text-align: center;
-            font-size: 18px;
-            color: #666;
-        }
-    </style>
+    <title>Programs - FitJourney</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
-<body>
-    <h1>All Programs</h1>
-
-    <div class="actions">
-        <a href="/programs/create">Create New Program</a>
-        <a href="/dashboard" class="secondary">Back to Dashboard</a>
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-dark px-4">
+    <a class="navbar-brand fw-bold" href="/">🏋️ FitJourney</a>
+    <div class="d-flex gap-2">
+        <a href="/dashboard" class="btn btn-outline-light btn-sm">Dashboard</a>
+        <a href="/enrollments/my" class="btn btn-outline-light btn-sm">My Enrollments</a>
+        <form th:action="@{/logout}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger btn-sm">Logout</button>
+        </form>
     </div>
-
-    <div th:if="${#lists.isEmpty(programs)}" class="no-programs">
-        <p>No programs yet</p>
+</nav>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>All Programs</h2>
+        <a sec:authorize="hasRole('TRAINER')"
+           href="/programs/create" class="btn btn-success">+ Create Program</a>
     </div>
-
-    <table th:unless="${#lists.isEmpty(programs)}">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Difficulty</th>
-                <th>Duration (weeks)</th>
-                <th>Price</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="program : ${programs}">
-                <td th:text="${program.title}"></td>
-                <td th:text="${program.difficulty}"></td>
-                <td th:text="${program.durationWeeks}"></td>
-                <td th:text="'$' + ${program.price}"></td>
-                <td>
+    <div th:if="${#lists.isEmpty(programs)}" class="alert alert-info">
+        No programs available yet.
+    </div>
+    <div class="row g-3" th:unless="${#lists.isEmpty(programs)}">
+        <div class="col-md-4" th:each="program : ${programs}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${program.title}"></h5>
+                    <span class="badge bg-secondary mb-2" th:text="${program.difficulty}"></span>
+                    <p class="card-text small text-muted">
+                        Duration: <strong th:text="${program.durationWeeks}"></strong> weeks
+                    </p>
+                    <p class="card-text">
+                        Price: <strong th:text="'$' + ${program.price}"></strong>
+                    </p>
+                </div>
+                <div class="card-footer d-flex gap-2 flex-wrap">
                     <form th:action="@{/enrollments/{id}/enroll(id=${program.id})}"
-                          method="post" style="display:inline;">
-                        <button type="submit">Enroll</button>
+                          method="post" class="d-inline">
+                        <button type="submit" class="btn btn-primary btn-sm">Enroll</button>
                     </form>
-                    <div sec:authorize="hasRole('TRAINER')">
-                        <a th:href="@{/programs/{id}/edit(id=${program.id})}">Edit</a>
+                    <div sec:authorize="hasRole('TRAINER')" class="d-flex gap-2">
+                        <a th:href="@{/programs/{id}/edit(id=${program.id})}"
+                           class="btn btn-warning btn-sm">Edit</a>
                         <form th:action="@{/programs/{id}/deactivate(id=${program.id})}"
-                              method="post" style="display:inline;">
-                            <button type="submit">Deactivate</button>
+                              method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Deactivate</button>
                         </form>
                     </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

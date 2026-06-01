@@ -4,127 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Enrollments - FitJourney</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .actions {
-            margin-bottom: 20px;
-        }
-        .actions a {
-            display: inline-block;
-            margin-right: 10px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .actions a:hover {
-            background-color: #0056b3;
-        }
-        .actions a.secondary {
-            background-color: #6c757d;
-        }
-        .actions a.secondary:hover {
-            background-color: #5a6268;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: bold;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .no-enrollments {
-            padding: 30px;
-            text-align: center;
-            font-size: 18px;
-            color: #666;
-        }
-        .progress-form {
-            display: inline;
-        }
-        .progress-form input {
-            width: 70px;
-            padding: 6px;
-            margin-right: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .progress-form button {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-        .progress-form button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
-<body>
-    <h1>My Enrollments</h1>
-
-    <div class="actions">
-        <a href="/programs/all">Browse Programs</a>
-        <a href="/dashboard" class="secondary">Back to Dashboard</a>
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-dark px-4">
+    <a class="navbar-brand fw-bold" href="/">🏋️ FitJourney</a>
+    <div class="d-flex gap-2">
+        <a href="/programs/all" class="btn btn-outline-light btn-sm">Browse Programs</a>
+        <a href="/dashboard" class="btn btn-outline-light btn-sm">Dashboard</a>
+        <form th:action="@{/logout}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger btn-sm">Logout</button>
+        </form>
     </div>
-
-    <div th:if="${#lists.isEmpty(enrollments)}" class="no-enrollments">
-        <p>No enrollments yet</p>
+</nav>
+<div class="container mt-4">
+    <h2 class="mb-4">My Enrollments</h2>
+    <div th:if="${#lists.isEmpty(enrollments)}" class="alert alert-info">
+        You have no enrollments yet.
+        <a href="/programs/all" class="alert-link">Browse programs</a>
     </div>
-
-    <table th:unless="${#lists.isEmpty(enrollments)}">
-        <thead>
-            <tr>
-                <th>Program Name</th>
-                <th>Difficulty</th>
-                <th>Progress (%)</th>
-                <th>Update Progress</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="enrollment : ${enrollments}">
-                <td th:text="${enrollment.workoutProgram.title}"></td>
-                <td th:text="${enrollment.workoutProgram.difficulty}"></td>
-                <td th:text="${enrollment.progressPercentage}"></td>
-                <td>
+    <div class="row g-3" th:unless="${#lists.isEmpty(enrollments)}">
+        <div class="col-md-6" th:each="enrollment : ${enrollments}">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${enrollment.workoutProgram.title}"></h5>
+                    <span class="badge bg-secondary mb-2"
+                          th:text="${enrollment.workoutProgram.difficulty}"></span>
+                    <div class="mb-2">
+                        <label class="form-label small">
+                            Progress: <strong th:text="${enrollment.progressPercentage} + '%'"></strong>
+                        </label>
+                        <div class="progress">
+                            <div class="progress-bar bg-success"
+                                 th:style="'width:' + ${enrollment.progressPercentage} + '%'">
+                            </div>
+                        </div>
+                    </div>
                     <form th:action="@{/enrollments/{id}/progress(id=${enrollment.id})}"
-                          method="post" class="progress-form">
-                        <input type="number" name="percentage" min="0" max="100"
-                               th:value="${enrollment.progressPercentage}" />
-                        <button type="submit">Update</button>
+                          method="post" class="d-flex gap-2 mt-3">
+                        <input type="number" name="percentage" class="form-control form-control-sm"
+                               min="0" max="100"
+                               th:value="${enrollment.progressPercentage}">
+                        <button type="submit" class="btn btn-primary btn-sm">Update</button>
                     </form>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
-
