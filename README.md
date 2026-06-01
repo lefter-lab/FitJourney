@@ -61,6 +61,7 @@ where trainers publish workout programs and users enroll and track progress.
 - `@CacheEvict` — clears cache on create, edit, deactivate and archive
 
 ## Project Structure
+```
 src/main/java/com/fitjourney/fitjourney/
 ├── config/
 │   ├── PasswordEncoderConfig.java
@@ -97,6 +98,7 @@ src/main/java/com/fitjourney/fitjourney/
 ├── UserService.java
 ├── WorkoutProgramService.java
 └── WorkoutReviewService.java
+```
 
 ## Getting Started
 
