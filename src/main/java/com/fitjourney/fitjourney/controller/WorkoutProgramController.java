@@ -6,6 +6,7 @@ import com.fitjourney.fitjourney.service.UserService;
 import com.fitjourney.fitjourney.service.WorkoutProgramService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,6 +28,7 @@ public class WorkoutProgramController {
     private final WorkoutProgramService workoutProgramService;
     private final UserService userService;
 
+    @PreAuthorize("hasRole('TRAINER')")
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("programDto", new WorkoutProgramDto());
@@ -34,6 +36,7 @@ public class WorkoutProgramController {
         return "programs/program-create";
     }
 
+    @PreAuthorize("hasRole('TRAINER')")
     @PostMapping("/create")
     public String createProgram(@Valid @ModelAttribute("programDto") WorkoutProgramDto dto,
                                 BindingResult bindingResult,
@@ -56,6 +59,7 @@ public class WorkoutProgramController {
         return "programs/programs-all";
     }
 
+    @PreAuthorize("hasRole('TRAINER')")
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable UUID id, Model model) {
         WorkoutProgram program = workoutProgramService.findById(id);
@@ -73,6 +77,7 @@ public class WorkoutProgramController {
         return "programs/program-edit";
     }
 
+    @PreAuthorize("hasRole('TRAINER')")
     @PostMapping("/{id}/edit")
     public String editProgram(@PathVariable UUID id,
                               @Valid @ModelAttribute("programDto") WorkoutProgramDto dto,
@@ -88,6 +93,7 @@ public class WorkoutProgramController {
         return "redirect:/programs/all";
     }
 
+    @PreAuthorize("hasRole('TRAINER')")
     @PostMapping("/{id}/deactivate")
     public String deactivateProgram(@PathVariable UUID id) {
         workoutProgramService.deactivateProgram(id);
