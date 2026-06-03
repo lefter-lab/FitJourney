@@ -5,6 +5,8 @@ import com.fitjourney.fitjourney.entity.User;
 import com.fitjourney.fitjourney.enums.UserRole;
 import com.fitjourney.fitjourney.exception.UserNotFoundException;
 import com.fitjourney.fitjourney.repository.UserRepository;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -45,6 +47,17 @@ public class UserService implements UserDetailsService {
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
             .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public void changeRole(UUID id, UserRole role) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new UserNotFoundException("User not found"));
+        user.setRole(role);
+        userRepository.save(user);
     }
 
     @Override
