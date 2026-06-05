@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Program Reviews - FitJourney</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark px-4">
+    <a class="navbar-brand fw-bold" href="/">🏋️ FitJourney</a>
+    <div class="d-flex gap-2">
+        <a href="/dashboard" class="btn btn-outline-light btn-sm">Dashboard</a>
+        <a href="/programs/all" class="btn btn-outline-light btn-sm">Programs</a>
+        <a href="/enrollments/my" class="btn btn-outline-light btn-sm">My Enrollments</a>
+        <form th:action="@{/logout}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="mb-4">
+        <h2 th:text="${program.title} + ' Reviews'">Program Reviews</h2>
+        <p class="text-muted" th:text="${program.description}">Program description</p>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${reviewError}" class="alert alert-danger" th:text="${reviewError}"></div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">
+            Add Review
+        </div>
+
+        <div class="card-body">
+            <form th:action="@{/reviews/programs/{id}(id=${program.id})}"
+                  th:object="${reviewDto}"
+                  method="post">
+
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Rating</label>
+                    <select id="rating" th:field="*{rating}" class="form-select">
+                        <option value="">Choose rating</option>
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                    <div class="text-danger small"
+                         th:if="${#fields.hasErrors('rating')}"
+                         th:errors="*{rating}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="comment" class="form-label">Comment</label>
+                    <textarea id="comment"
+                              th:field="*{comment}"
+                              class="form-control"
+                              rows="4"
+                              maxlength="500"
+                              placeholder="Share your experience with this program"></textarea>
+                    <div class="text-danger small"
+                         th:if="${#fields.hasErrors('comment')}"
+                         th:errors="*{comment}">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Submit Review
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <h4 class="mb-3">Existing Reviews</h4>
+
+    <div th:if="${#lists.isEmpty(reviews)}" class="alert alert-info">
+        No reviews yet.
+    </div>
+
+    <div class="row g-3" th:unless="${#lists.isEmpty(reviews)}">
+        <div class="col-md-6" th:each="review : ${reviews}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        Rating:
+                        <span th:text="${review.rating}">5</span>/5
+                    </h5>
+
+                    <p class="card-text"
+                       th:text="${review.comment != null && !#strings.isEmpty(review.comment) ? review.comment : 'No comment provided.'}">
+                    </p>
+
+                    <p class="text-muted small mb-0">
+                        By:
+                        <span th:text="${review.user.username}">username</span>
+                    </p>
+
+                    <p class="text-muted small mb-0">
+                        Created:
+                        <span th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy HH:mm')}">
+                            date
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
