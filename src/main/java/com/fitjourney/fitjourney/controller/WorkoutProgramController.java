@@ -1,6 +1,7 @@
 package com.fitjourney.fitjourney.controller;
 
 import com.fitjourney.fitjourney.dto.WorkoutProgramDto;
+import com.fitjourney.fitjourney.entity.WorkoutProgram;
 import com.fitjourney.fitjourney.enums.DifficultyLevel;
 import com.fitjourney.fitjourney.service.UserService;
 import com.fitjourney.fitjourney.service.WorkoutProgramService;
@@ -12,12 +13,11 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
-import com.fitjourney.fitjourney.entity.WorkoutProgram;
-import org.springframework.web.bind.annotation.PathVariable;
 import java.util.UUID;
 
 @Controller
@@ -63,6 +63,7 @@ public class WorkoutProgramController {
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable UUID id, Model model) {
         WorkoutProgram program = workoutProgramService.findById(id);
+
         WorkoutProgramDto dto = new WorkoutProgramDto();
         dto.setName(program.getTitle());
         dto.setDescription(program.getDescription());
@@ -97,6 +98,13 @@ public class WorkoutProgramController {
     @PostMapping("/{id}/deactivate")
     public String deactivateProgram(@PathVariable UUID id) {
         workoutProgramService.deactivateProgram(id);
+        return "redirect:/programs/all";
+    }
+
+    @PreAuthorize("hasRole('TRAINER')")
+    @PostMapping("/{id}/delete")
+    public String deleteProgram(@PathVariable UUID id) {
+        workoutProgramService.deleteProgram(id);
         return "redirect:/programs/all";
     }
 }
