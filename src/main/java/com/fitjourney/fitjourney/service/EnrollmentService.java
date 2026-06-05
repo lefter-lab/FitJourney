@@ -33,19 +33,25 @@ public class EnrollmentService {
     }
 
     public void updateProgress(UUID enrollmentId, int percentage) {
+        if (percentage < 0 || percentage > 100) {
+            throw new IllegalArgumentException("Progress must be between 0 and 100");
+        }
+
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-            .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+
         enrollment.setProgressPercentage(percentage);
         enrollmentRepository.save(enrollment);
     }
 
     public void updateExpiredEnrollments() {
         List<Enrollment> enrollments = enrollmentRepository.findAll();
+
         enrollments.stream()
-            .filter(e -> e.getProgressPercentage() >= 100)
-            .forEach(e -> {
-                e.setStatus(EnrollmentStatus.COMPLETED);
-                enrollmentRepository.save(e);
-            });
+                .filter(e -> e.getProgressPercentage() >= 100)
+                .forEach(e -> {
+                    e.setStatus(EnrollmentStatus.COMPLETED);
+                    enrollmentRepository.save(e);
+                });
     }
 }
