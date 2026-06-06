@@ -4,6 +4,7 @@ import com.fitjourney.fitjourney.dto.WorkoutReviewDto;
 import com.fitjourney.fitjourney.entity.User;
 import com.fitjourney.fitjourney.entity.WorkoutProgram;
 import com.fitjourney.fitjourney.entity.WorkoutReview;
+import com.fitjourney.fitjourney.exception.DuplicateReviewException;
 import com.fitjourney.fitjourney.repository.WorkoutReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class WorkoutReviewService {
         );
 
         if (alreadyReviewed) {
-            throw new IllegalArgumentException("You have already reviewed this program");
+            throw new DuplicateReviewException("You have already reviewed this program");
         }
 
         WorkoutReview review = new WorkoutReview();

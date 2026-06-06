@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Program Reviews - FitJourney</title>
@@ -29,7 +30,7 @@
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
     <div th:if="${reviewError}" class="alert alert-danger" th:text="${reviewError}"></div>
 
-    <div class="card shadow-sm mb-4">
+    <div sec:authorize="hasRole('USER')" class="card shadow-sm mb-4">
         <div class="card-header fw-bold">
             Add Review
         </div>

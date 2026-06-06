@@ -1,8 +1,10 @@
 package com.fitjourney.fitjourney.controller;
 
 import com.fitjourney.fitjourney.dto.WorkoutProgramDto;
+import com.fitjourney.fitjourney.entity.User;
 import com.fitjourney.fitjourney.entity.WorkoutProgram;
 import com.fitjourney.fitjourney.enums.DifficultyLevel;
+import com.fitjourney.fitjourney.exception.UnauthorizedProgramAccessException;
 import com.fitjourney.fitjourney.service.UserService;
 import com.fitjourney.fitjourney.service.WorkoutProgramService;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.UUID;
@@ -47,22 +50,28 @@ public class WorkoutProgramController {
             return "programs/program-create";
         }
 
-        var user = userService.findByUsername(principal.getName());
+        User user = userService.findByUsername(principal.getName());
         workoutProgramService.createProgram(dto, user);
 
         return "redirect:/programs/all";
     }
 
     @GetMapping("/all")
-    public String getAllPrograms(Model model) {
+    public String getAllPrograms(Model model, Principal principal) {
         model.addAttribute("programs", workoutProgramService.getAllPrograms());
+        if (principal != null) {
+            User user = userService.findByUsername(principal.getName());
+            model.addAttribute("currentUserId", user.getId());
+        }
         return "programs/programs-all";
     }
 
     @PreAuthorize("hasRole('TRAINER')")
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable UUID id, Model model) {
+    public String showEditForm(@PathVariable UUID id, Model model, Principal principal) {
         WorkoutProgram program = workoutProgramService.findById(id);
+        User trainer = userService.findByUsername(principal.getName());
+        workoutProgramService.verifyTrainerOwnership(program, trainer);
 
         WorkoutProgramDto dto = new WorkoutProgramDto();
         dto.setName(program.getTitle());
@@ -83,28 +92,58 @@ public class WorkoutProgramController {
     public String editProgram(@PathVariable UUID id,
                               @Valid @ModelAttribute("programDto") WorkoutProgramDto dto,
                               BindingResult bindingResult,
-                              Model model) {
+                              Model model,
+                              Principal principal,
+                              RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("levels", DifficultyLevel.values());
             model.addAttribute("programId", id);
             return "programs/program-edit";
         }
 
-        workoutProgramService.updateProgram(id, dto);
+        User trainer = userService.findByUsername(principal.getName());
+
+        try {
+            workoutProgramService.updateProgram(id, dto, trainer);
+        } catch (UnauthorizedProgramAccessException exception) {
+            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+            return "redirect:/programs/all";
+        }
+
         return "redirect:/programs/all";
     }
 
     @PreAuthorize("hasRole('TRAINER')")
     @PostMapping("/{id}/deactivate")
-    public String deactivateProgram(@PathVariable UUID id) {
-        workoutProgramService.deactivateProgram(id);
+    public String deactivateProgram(@PathVariable UUID id,
+                                    Principal principal,
+                                    RedirectAttributes redirectAttributes) {
+        User trainer = userService.findByUsername(principal.getName());
+
+        try {
+            workoutProgramService.deactivateProgram(id, trainer);
+        } catch (UnauthorizedProgramAccessException exception) {
+            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+            return "redirect:/programs/all";
+        }
+
         return "redirect:/programs/all";
     }
 
     @PreAuthorize("hasRole('TRAINER')")
     @PostMapping("/{id}/delete")
-    public String deleteProgram(@PathVariable UUID id) {
-        workoutProgramService.deleteProgram(id);
+    public String deleteProgram(@PathVariable UUID id,
+                                  Principal principal,
+                                  RedirectAttributes redirectAttributes) {
+        User trainer = userService.findByUsername(principal.getName());
+
+        try {
+            workoutProgramService.deleteProgram(id, trainer);
+        } catch (UnauthorizedProgramAccessException exception) {
+            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+            return "redirect:/programs/all";
+        }
+
         return "redirect:/programs/all";
     }
 }
