@@ -288,7 +288,26 @@ Open:
 ```text
 http://localhost:8080
 ```
+Test Roles Setup
 
+Newly registered accounts receive the USER role by default.
+
+To test TRAINER and ADMIN functionality, update the desired user role directly in the database after registration.
+
+Example
+UPDATE users
+SET role = 'TRAINER'
+WHERE username = 'trainer';
+
+UPDATE users
+SET role = 'ADMIN'
+WHERE username = 'admin';
+Recommended Test Accounts
+Register a regular user account through /register.
+Register a trainer account through /register, then update its role to TRAINER.
+Register an admin account through /register, then update its role to ADMIN.
+
+After changing roles in the database, log out and log in again for the new permissions to take effect.
 ---
 
 # GitHub
