@@ -6,6 +6,14 @@ The application allows trainers to create workout programs, while users can enro
 
 ---
 
+## Course Context
+
+This project was developed as an individual project assignment for the Spring Fundamentals course at SoftUni.
+
+The project demonstrates the practical application of Spring Boot fundamentals, including MVC architecture, Thymeleaf views, Spring Data JPA, Spring Security, validation, role-based access control, and basic CRUD functionality.
+
+---
+
 # Tech Stack
 
 | Layer           | Technology                  |
@@ -288,13 +296,15 @@ Open:
 ```text
 http://localhost:8080
 ```
-Test Roles Setup
+## Test Roles Setup
 
 Newly registered accounts receive the USER role by default.
 
 To test TRAINER and ADMIN functionality, update the desired user role directly in the database after registration.
 
 Example
+
+```sql
 UPDATE users
 SET role = 'TRAINER'
 WHERE username = 'trainer';
@@ -302,6 +312,8 @@ WHERE username = 'trainer';
 UPDATE users
 SET role = 'ADMIN'
 WHERE username = 'admin';
+```
+
 Recommended Test Accounts
 Register a regular user account through /register.
 Register a trainer account through /register, then update its role to TRAINER.
@@ -313,3 +325,7 @@ After changing roles in the database, log out and log in again for the new permi
 # GitHub
 
 https://github.com/lefter-lab/FitJourney
+
+## License / Course Project
+
+This project was developed for educational purposes as part of the Spring Fundamentals course at SoftUni.
