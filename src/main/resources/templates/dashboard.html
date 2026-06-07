@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - FitJourney</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body>
-<nav class="navbar navbar-dark bg-dark px-4">
+<body class="fj-page">
+<nav class="navbar navbar-dark fj-navbar px-4">
     <a class="navbar-brand fw-bold" href="/">🏋️ FitJourney</a>
-    <div class="d-flex gap-3">
+    <div class="d-flex gap-2">
         <a href="/programs/all" class="btn btn-outline-light btn-sm">Browse Programs</a>
         <a href="/enrollments/my" class="btn btn-outline-light btn-sm">My Enrollments</a>
         <form th:action="@{/logout}" method="post" class="d-inline">
@@ -17,17 +18,20 @@
         </form>
     </div>
 </nav>
-<div class="container mt-5">
-    <div class="card shadow p-4">
-        <h2 class="mb-3">👋 Welcome to FitJourney!</h2>
-        <p class="text-muted">You are successfully logged in.</p>
-        <div class="d-flex flex-wrap gap-2 mt-3">
-            <a sec:authorize="hasRole('ADMIN')" href="/admin/users" class="btn btn-primary m-2">Admin Panel</a>
-            <a sec:authorize="hasRole('TRAINER')" href="/programs/create" class="btn btn-success m-2">Create New Program</a>
-            <a href="/enrollments/my" class="btn btn-outline-secondary m-2">My Enrollments</a>
-            <a href="/programs/all" class="btn btn-primary m-2">Browse All Programs</a>
+
+<main class="container fj-main">
+    <div class="card fj-card fj-dashboard-welcome fj-card-padded">
+        <div class="fj-page-header">
+            <h2>👋 Welcome to FitJourney!</h2>
+            <p>You are successfully logged in.</p>
+        </div>
+        <div class="fj-action-grid">
+            <a sec:authorize="hasRole('ADMIN')" href="/admin/users" class="btn btn-primary">Admin Panel</a>
+            <a sec:authorize="hasRole('TRAINER')" href="/programs/create" class="btn btn-success">Create New Program</a>
+            <a href="/enrollments/my" class="btn btn-outline-secondary">My Enrollments</a>
+            <a href="/programs/all" class="btn btn-primary">Browse All Programs</a>
         </div>
     </div>
-</div>
+</main>
 </body>
 </html>

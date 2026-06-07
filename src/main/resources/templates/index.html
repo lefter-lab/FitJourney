@@ -5,25 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FitJourney</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body>
-<nav class="navbar navbar-dark bg-dark px-4">
+<body class="fj-page fj-page-landing">
+<nav class="navbar navbar-dark fj-navbar px-4">
     <a class="navbar-brand fw-bold" href="/">🏋️ FitJourney</a>
     <div class="d-flex gap-2">
         <a href="/login" class="btn btn-outline-light btn-sm">Login</a>
         <a href="/register" class="btn btn-primary btn-sm">Register</a>
     </div>
 </nav>
-<div class="container mt-5 text-center">
-    <h1 class="display-4 fw-bold">Welcome to FitJourney 🏋️</h1>
-    <p class="lead text-muted mt-3">
+
+<section class="container fj-hero">
+    <span class="fj-hero-badge">Fitness Platform</span>
+    <h1>Welcome to FitJourney 🏋️</h1>
+    <p class="lead">
         The platform where trainers publish workout programs
         and users track their fitness progress.
     </p>
-    <div class="d-flex justify-content-center gap-3 mt-4">
+    <div class="d-flex justify-content-center gap-3 fj-hero-actions flex-wrap">
         <a href="/register" class="btn btn-primary btn-lg">Get Started</a>
         <a href="/login" class="btn btn-outline-secondary btn-lg">Login</a>
     </div>
-</div>
+</section>
 </body>
 </html>
