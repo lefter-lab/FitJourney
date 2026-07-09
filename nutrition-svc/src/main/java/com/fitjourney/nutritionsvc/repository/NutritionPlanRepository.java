@@ -9,8 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface NutritionPlanRepository extends JpaRepository<NutritionPlan, UUID> {
-
     Optional<NutritionPlan> findByProgramId(UUID programId);
-
     boolean existsByProgramId(UUID programId);
 }

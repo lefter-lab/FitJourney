@@ -1,9 +1,6 @@
 package com.fitjourney.nutritionsvc.controller;
 
-import com.fitjourney.nutritionsvc.dto.MealEntryDto;
-import com.fitjourney.nutritionsvc.dto.MealEntryResponseDto;
-import com.fitjourney.nutritionsvc.dto.NutritionPlanDto;
-import com.fitjourney.nutritionsvc.dto.NutritionPlanResponseDto;
+import com.fitjourney.nutritionsvc.dto.*;
 import com.fitjourney.nutritionsvc.service.NutritionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,37 +17,18 @@ public class NutritionController {
 
     private final NutritionService nutritionService;
 
-    // GET /nutrition/programs/{programId}
-    // Извиква се от main app когато потребител отвори страницата на програмата
-    @GetMapping("/programs/{programId}")
-    public ResponseEntity<NutritionPlanResponseDto> getPlanByProgram(@PathVariable UUID programId) {
-        NutritionPlanResponseDto plan = nutritionService.getPlanByProgramId(programId);
-        return ResponseEntity.ok(plan);
-    }
-
-    // POST /nutrition/plans
-    // Извиква се от main app когато TRAINER създаде програма
-    @PostMapping("/plans")
+    @PostMapping("/programs")
     public ResponseEntity<NutritionPlanResponseDto> createPlan(@Valid @RequestBody NutritionPlanDto dto) {
-        NutritionPlanResponseDto created = nutritionService.createPlan(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nutritionService.createPlan(dto));
     }
 
-    // POST /nutrition/plans/{id}/meals
-    // Извиква се от main app когато TRAINER добави хранене към план
-    @PostMapping("/plans/{id}/meals")
-    public ResponseEntity<MealEntryResponseDto> addMeal(
-            @PathVariable UUID id,
-            @Valid @RequestBody MealEntryDto dto) {
-        MealEntryResponseDto meal = nutritionService.addMeal(id, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(meal);
+    @GetMapping("/programs/{programId}")
+    public ResponseEntity<NutritionPlanResponseDto> getPlanByProgramId(@PathVariable UUID programId) {
+        return ResponseEntity.ok(nutritionService.getPlanByProgramId(programId));
     }
 
-    // DELETE /nutrition/plans/{id}
-    // Извиква се от main app когато TRAINER изтрие програма
-    @DeleteMapping("/plans/{id}")
-    public ResponseEntity<Void> deletePlan(@PathVariable UUID id) {
-        nutritionService.deletePlan(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/plans/{planId}/meals")
+    public ResponseEntity<MealEntryResponseDto> addMealEntry(@PathVariable UUID planId, @Valid @RequestBody MealEntryDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(nutritionService.addMealEntry(planId, dto));
     }
 }

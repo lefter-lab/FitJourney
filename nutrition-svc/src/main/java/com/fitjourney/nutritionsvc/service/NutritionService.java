@@ -1,82 +1,91 @@
 package com.fitjourney.nutritionsvc.service;
 
-import com.fitjourney.nutritionsvc.dto.MealEntryDto;
-import com.fitjourney.nutritionsvc.dto.MealEntryResponseDto;
-import com.fitjourney.nutritionsvc.dto.NutritionPlanDto;
-import com.fitjourney.nutritionsvc.dto.NutritionPlanResponseDto;
-import com.fitjourney.nutritionsvc.entity.MealEntry;
-import com.fitjourney.nutritionsvc.entity.NutritionPlan;
-import com.fitjourney.nutritionsvc.exception.DuplicatePlanException;
-import com.fitjourney.nutritionsvc.exception.NutritionPlanNotFoundException;
-import com.fitjourney.nutritionsvc.repository.MealEntryRepository;
-import com.fitjourney.nutritionsvc.repository.NutritionPlanRepository;
+import com.fitjourney.nutritionsvc.dto.*;
+import com.fitjourney.nutritionsvc.entity.*;
+import com.fitjourney.nutritionsvc.exception.*;
+import com.fitjourney.nutritionsvc.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NutritionService {
 
     private final NutritionPlanRepository nutritionPlanRepository;
     private final MealEntryRepository mealEntryRepository;
 
-    public NutritionPlanResponseDto getPlanByProgramId(UUID programId) {
-        log.info("Fetching nutrition plan for program: {}", programId);
-
-        // TODO: намери NutritionPlan по programId
-        // TODO: намери всички MealEntry за плана
-        // TODO: мапирай към NutritionPlanResponseDto и върни
-        // Hint: хвърли NutritionPlanNotFoundException ако не съществува
-
-        throw new UnsupportedOperationException("TODO: implement getPlanByProgramId");
-    }
-
+    @Transactional
     public NutritionPlanResponseDto createPlan(NutritionPlanDto dto) {
-        log.info("Creating nutrition plan for program: {}", dto.getProgramId());
+        log.info("Attempting to create nutrition plan for programId: {}", dto.getProgramId());
+        
+        if (nutritionPlanRepository.existsByProgramId(dto.getProgramId())) {
+            log.warn("Nutrition plan already exists for programId: {}", dto.getProgramId());
+            throw new DuplicatePlanException("A nutrition plan already exists for this workout program.");
+        }
 
-        // TODO: провери дали вече съществува план за този programId
-        // TODO: създай нов NutritionPlan от dto
-        // TODO: запази и върни като NutritionPlanResponseDto
-        // Hint: хвърли DuplicatePlanException ако вече има план
+        NutritionPlan plan = new NutritionPlan();
+        plan.setName(dto.getName());
+        plan.setDescription(dto.getDescription());
+        plan.setDailyCalories(dto.getDailyCalories());
+        plan.setProgramId(dto.getProgramId());
+        plan.setCreatedAt(LocalDateTime.now());
 
-        throw new UnsupportedOperationException("TODO: implement createPlan");
+        NutritionPlan savedPlan = nutritionPlanRepository.save(plan);
+        return mapToPlanResponse(savedPlan);
     }
 
-    public MealEntryResponseDto addMeal(UUID planId, MealEntryDto dto) {
-        log.info("Adding meal to plan: {}", planId);
-
-        // TODO: намери NutritionPlan по planId
-        // TODO: създай нов MealEntry от dto
-        // TODO: запази и върни като MealEntryResponseDto
-        // Hint: хвърли NutritionPlanNotFoundException ако плана не съществува
-
-        throw new UnsupportedOperationException("TODO: implement addMeal");
+    @Transactional(readOnly = true)
+    public NutritionPlanResponseDto getPlanByProgramId(UUID programId) {
+        NutritionPlan plan = nutritionPlanRepository.findByProgramId(programId)
+                .orElseThrow(() -> new NutritionPlanNotFoundException("Nutrition plan not found for program ID: " + programId));
+        return mapToPlanResponse(plan);
     }
 
-    public void deletePlan(UUID planId) {
-        log.info("Deleting nutrition plan: {}", planId);
+    @Transactional
+    public MealEntryResponseDto addMealEntry(UUID planId, MealEntryDto dto) {
+        NutritionPlan plan = nutritionPlanRepository.findById(planId)
+                .orElseThrow(() -> new NutritionPlanNotFoundException("Nutrition plan not found with ID: " + planId));
 
-        // TODO: намери NutritionPlan по planId
-        // TODO: изтрий всички MealEntry за плана
-        // TODO: изтрий плана
-        // Hint: хвърли NutritionPlanNotFoundException ако не съществува
+        MealEntry entry = new MealEntry();
+        entry.setMealName(dto.getMealName());
+        entry.setCalories(dto.getCalories());
+        entry.setProtein(dto.getProtein());
+        entry.setCarbs(dto.getCarbs());
+        entry.setFats(dto.getFats());
+        
+       
+        entry.setDayOfWeek(dto.getDayOfWeek());
+        entry.setNutritionPlan(plan);
 
-        throw new UnsupportedOperationException("TODO: implement deletePlan");
+        MealEntry savedEntry = mealEntryRepository.save(entry);
+        return mapToMealResponse(savedEntry);
     }
 
-    // Helper methods — напиши ги след като имплементираш горните методи
-    private NutritionPlanResponseDto toResponseDto(NutritionPlan plan, List<MealEntry> meals) {
-        // TODO: попълни mapping логиката
-        throw new UnsupportedOperationException("TODO: implement toResponseDto");
+    private NutritionPlanResponseDto mapToPlanResponse(NutritionPlan plan) {
+        NutritionPlanResponseDto response = new NutritionPlanResponseDto();
+        response.setId(plan.getId());
+        response.setName(plan.getName());
+        response.setDescription(plan.getDescription());
+        response.setDailyCalories(plan.getDailyCalories());
+        response.setProgramId(plan.getProgramId());
+        return response;
     }
 
-    private MealEntryResponseDto toMealResponseDto(MealEntry meal) {
-        // TODO: попълни mapping логиката
-        throw new UnsupportedOperationException("TODO: implement toMealResponseDto");
+    private MealEntryResponseDto mapToMealResponse(MealEntry entry) {
+        MealEntryResponseDto response = new MealEntryResponseDto();
+        response.setId(entry.getId());
+        response.setMealName(entry.getMealName());
+        response.setCalories(entry.getCalories());
+        response.setProtein(entry.getProtein());
+        response.setCarbs(entry.getCarbs());
+        response.setFats(entry.getFats());
+        response.setDayOfWeek(entry.getDayOfWeek());
+        return response;
     }
 }
