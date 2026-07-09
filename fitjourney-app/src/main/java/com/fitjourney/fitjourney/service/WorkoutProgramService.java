@@ -1,0 +1,99 @@
+package com.fitjourney.fitjourney.service;
+
+import com.fitjourney.fitjourney.dto.WorkoutProgramDto;
+import com.fitjourney.fitjourney.entity.User;
+import com.fitjourney.fitjourney.entity.WorkoutProgram;
+import com.fitjourney.fitjourney.exception.ProgramNotFoundException;
+import com.fitjourney.fitjourney.exception.UnauthorizedProgramAccessException;
+import com.fitjourney.fitjourney.repository.WorkoutProgramRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class WorkoutProgramService {
+
+    private final WorkoutProgramRepository workoutProgramRepository;
+
+    @CacheEvict(value = "programs", allEntries = true)
+    public void createProgram(WorkoutProgramDto dto, User creator) {
+        WorkoutProgram program = new WorkoutProgram();
+        program.setTitle(dto.getName());
+        program.setDescription(dto.getDescription());
+        program.setDifficulty(dto.getDifficultyLevel());
+        program.setDurationWeeks(dto.getDurationWeeks());
+        program.setPrice(BigDecimal.valueOf(dto.getPrice()));
+        program.setTrainer(creator);
+        program.setActive(true);
+
+        workoutProgramRepository.save(program);
+        log.info("Workout program '{}' successfully created by trainer.", dto.getName());
+    }
+
+    @Cacheable("programs")
+    public List<WorkoutProgram> getAllPrograms() {
+        return workoutProgramRepository.findAllByActiveTrue();
+    }
+
+    public WorkoutProgram findById(UUID id) {
+        return workoutProgramRepository.findById(id)
+                .orElseThrow(() -> new ProgramNotFoundException("Program not found with id: " + id));
+    }
+
+    @CacheEvict(value = "programs", allEntries = true)
+    public void updateProgram(UUID id, WorkoutProgramDto dto, User trainer) {
+        WorkoutProgram program = findById(id);
+        verifyTrainerOwnership(program, trainer);
+
+        program.setTitle(dto.getName());
+        program.setDescription(dto.getDescription());
+        program.setDifficulty(dto.getDifficultyLevel());
+        program.setDurationWeeks(dto.getDurationWeeks());
+        program.setPrice(BigDecimal.valueOf(dto.getPrice()));
+
+        workoutProgramRepository.save(program);
+    }
+
+    @CacheEvict(value = "programs", allEntries = true)
+    public void deactivateProgram(UUID id, User trainer) {
+        WorkoutProgram program = findById(id);
+        verifyTrainerOwnership(program, trainer);
+        program.setActive(false);
+
+        workoutProgramRepository.save(program);
+    }
+
+    @CacheEvict(value = "programs", allEntries = true)
+    public void deleteProgram(UUID id, User trainer) {
+        WorkoutProgram program = findById(id);
+        verifyTrainerOwnership(program, trainer);
+        workoutProgramRepository.delete(program);
+        log.info("Workout program with ID '{}' was deleted.", id);
+    }
+
+    public void verifyTrainerOwnership(WorkoutProgram program, User trainer) {
+        if (!program.getTrainer().getId().equals(trainer.getId())) {
+            throw new UnauthorizedProgramAccessException("You can only manage your own workout programs");
+        }
+    }
+
+    @CacheEvict(value = "programs", allEntries = true)
+    public void archiveInactivePrograms() {
+        List<WorkoutProgram> programs = workoutProgramRepository.findAllByActiveTrue();
+
+        programs.stream()
+                .filter(p -> p.getDurationWeeks() < 1)
+                .forEach(p -> {
+                    p.setActive(false);
+                    workoutProgramRepository.save(p);
+                });
+    }
+}
