@@ -144,6 +144,8 @@
                       th:object="${nutritionPlanForm}"
                       class="row g-3">
 
+                    <input type="hidden" th:field="*{programId}">
+
                     <div class="col-12">
                         <label for="nutritionPlanName" class="form-label">Plan Name</label>
                         <input type="text"
