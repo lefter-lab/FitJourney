@@ -5,6 +5,7 @@ import com.fitjourney.fitjourney.entity.User;
 import com.fitjourney.fitjourney.entity.WorkoutProgram;
 import com.fitjourney.fitjourney.enums.DifficultyLevel;
 import com.fitjourney.fitjourney.exception.UnauthorizedProgramAccessException;
+import com.fitjourney.fitjourney.service.NutritionIntegrationService;
 import com.fitjourney.fitjourney.service.UserService;
 import com.fitjourney.fitjourney.service.WorkoutProgramService;
 import jakarta.validation.Valid;
@@ -30,6 +31,15 @@ public class WorkoutProgramController {
 
     private final WorkoutProgramService workoutProgramService;
     private final UserService userService;
+    private final NutritionIntegrationService nutritionIntegrationService;
+
+    @GetMapping("/{id}")
+    public String showProgramDetails(@PathVariable UUID id, Model model) {
+        WorkoutProgram program = workoutProgramService.findById(id);
+        model.addAttribute("program", program);
+        model.addAttribute("nutritionPlan", nutritionIntegrationService.findPlanByProgramId(id).orElse(null));
+        return "programs/program-details";
+    }
 
     @PreAuthorize("hasRole('TRAINER')")
     @GetMapping("/create")
