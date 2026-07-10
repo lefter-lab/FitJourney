@@ -1,5 +1,6 @@
 package com.fitjourney.fitjourney.controller;
 
+import com.fitjourney.fitjourney.client.dto.MealEntryRequestDto;
 import com.fitjourney.fitjourney.client.dto.NutritionPlanRequestDto;
 import com.fitjourney.fitjourney.dto.WorkoutProgramDto;
 import com.fitjourney.fitjourney.entity.User;
@@ -39,6 +40,7 @@ public class WorkoutProgramController {
         WorkoutProgram program = workoutProgramService.findById(id);
         NutritionPlanRequestDto nutritionPlanForm = new NutritionPlanRequestDto();
         nutritionPlanForm.setProgramId(id);
+        model.addAttribute("mealEntryForm", new MealEntryRequestDto());
         model.addAttribute("program", program);
         model.addAttribute("nutritionPlan", nutritionIntegrationService.findPlanByProgramId(id).orElse(null));
         model.addAttribute("nutritionPlanForm", nutritionPlanForm);
@@ -65,6 +67,27 @@ public class WorkoutProgramController {
         }
 
         return "redirect:/programs/" + id;
+    }
+
+    @PreAuthorize("hasRole('TRAINER') or hasRole('ADMIN')")
+    @PostMapping("/{programId}/nutrition-plan/{planId}/meals")
+    public String addMealToNutritionPlan(@PathVariable UUID programId,
+                                         @PathVariable UUID planId,
+                                         @Valid @ModelAttribute("mealEntryForm") MealEntryRequestDto mealEntryForm,
+                                         BindingResult bindingResult,
+                                         RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please correct the meal form.");
+            return "redirect:/programs/" + programId;
+        }
+
+        if (nutritionIntegrationService.addMealToPlan(planId, mealEntryForm).isPresent()) {
+            redirectAttributes.addFlashAttribute("successMessage", "Meal added successfully.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Meal could not be added right now.");
+        }
+
+        return "redirect:/programs/" + programId;
     }
 
     @PreAuthorize("hasRole('TRAINER')")

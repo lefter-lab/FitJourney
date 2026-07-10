@@ -1,5 +1,7 @@
 package com.fitjourney.fitjourney.client;
 
+import com.fitjourney.fitjourney.client.dto.MealEntryRequestDto;
+import com.fitjourney.fitjourney.client.dto.MealEntryResponseDto;
 import com.fitjourney.fitjourney.client.dto.NutritionPlanRequestDto;
 import com.fitjourney.fitjourney.client.dto.NutritionPlanResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -18,4 +20,7 @@ public interface NutritionClient {
 
     @PostMapping("/programs")
     NutritionPlanResponseDto createPlan(@RequestBody NutritionPlanRequestDto dto);
+
+    @PostMapping("/plans/{planId}/meals")
+    MealEntryResponseDto addMealToPlan(@PathVariable("planId") UUID planId, @RequestBody MealEntryRequestDto dto);
 }

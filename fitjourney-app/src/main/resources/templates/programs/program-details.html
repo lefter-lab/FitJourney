@@ -148,6 +148,55 @@
                 </form>
             </div>
 
+            <div th:if="${nutritionPlan != null}"
+                 sec:authorize="hasAnyRole('TRAINER','ADMIN')"
+                 class="mt-4">
+                <hr class="my-4">
+
+                <h4 class="mb-3">Add Meal</h4>
+
+                <form th:action="@{/programs/{programId}/nutrition-plan/{planId}/meals(programId=${program.id}, planId=${nutritionPlan.id})}"
+                      method="post"
+                      th:object="${mealEntryForm}"
+                      class="row g-3">
+
+                    <div class="col-12">
+                        <label for="mealName" class="form-label">Meal Name</label>
+                        <input type="text"
+                               id="mealName"
+                               th:field="*{mealName}"
+                               class="form-control"
+                               placeholder="Enter meal name">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="mealTime" class="form-label">Meal Time</label>
+                        <input type="text"
+                               id="mealTime"
+                               th:field="*{mealTime}"
+                               class="form-control"
+                               placeholder="e.g. Breakfast">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="mealCalories" class="form-label">Calories</label>
+                        <input type="number"
+                               id="mealCalories"
+                               th:field="*{calories}"
+                               class="form-control"
+                               min="1"
+                               placeholder="Enter calories">
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            Add Meal
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
         </div>
 
     </div>
