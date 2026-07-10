@@ -93,6 +93,39 @@
                     Daily calories:
                     <strong th:text="${nutritionPlan.dailyCalories}">0</strong>
                 </p>
+
+                <div class="mt-4" th:if="${nutritionPlan.meals != null and !nutritionPlan.meals.isEmpty()}">
+                    <h5 class="mb-3">Meals</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead>
+                            <tr>
+                                <th scope="col">Day</th>
+                                <th scope="col">Meal</th>
+                                <th scope="col">Calories</th>
+                                <th scope="col">Protein</th>
+                                <th scope="col">Carbs</th>
+                                <th scope="col">Fats</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="meal : ${nutritionPlan.meals}">
+                                <td th:text="${meal.dayOfWeek}">MONDAY</td>
+                                <td th:text="${meal.mealName}">Meal name</td>
+                                <td th:text="${meal.calories}">0</td>
+                                <td th:text="${meal.protein}">0</td>
+                                <td th:text="${meal.carbs}">0</td>
+                                <td th:text="${meal.fats}">0</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-4" th:if="${nutritionPlan.meals == null or nutritionPlan.meals.isEmpty()}">
+                    No meals have been added to this nutrition plan yet.
+                </div>
             </div>
 
             <div th:if="${nutritionPlan == null}" class="alert alert-info mb-0">
@@ -170,22 +203,45 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="mealTime" class="form-label">Meal Time</label>
-                        <input type="text"
-                               id="mealTime"
-                               th:field="*{mealTime}"
+                        <label for="mealProtein" class="form-label">Protein</label>
+                        <input type="number"
+                               id="mealProtein"
+                               th:field="*{protein}"
                                class="form-control"
-                               placeholder="e.g. Breakfast">
+                               min="0"
+                               placeholder="Enter protein">
                     </div>
 
                     <div class="col-md-6">
-                        <label for="mealCalories" class="form-label">Calories</label>
+                        <label for="mealCarbs" class="form-label">Carbs</label>
                         <input type="number"
-                               id="mealCalories"
-                               th:field="*{calories}"
+                               id="mealCarbs"
+                               th:field="*{carbs}"
                                class="form-control"
-                               min="1"
-                               placeholder="Enter calories">
+                               min="0"
+                               placeholder="Enter carbs">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="mealFats" class="form-label">Fats</label>
+                        <input type="number"
+                               id="mealFats"
+                               th:field="*{fats}"
+                               class="form-control"
+                               min="0"
+                               placeholder="Enter fats">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="mealDayOfWeek" class="form-label">Day of Week</label>
+                        <select id="mealDayOfWeek"
+                                th:field="*{dayOfWeek}"
+                                class="form-select">
+                            <option value="">Select day</option>
+                            <option th:each="day : ${daysOfWeek}"
+                                    th:value="${day}"
+                                    th:text="${day}"></option>
+                        </select>
                     </div>
 
                     <div class="col-12">

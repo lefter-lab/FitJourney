@@ -13,8 +13,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // TODO: след лекцията на 13 юли (Exception Handling) — подобри формата на грешките
-
     @ExceptionHandler(NutritionPlanNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNutritionPlanNotFound(NutritionPlanNotFoundException ex) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
@@ -25,7 +23,6 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    // Built-in Spring exception handler
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();

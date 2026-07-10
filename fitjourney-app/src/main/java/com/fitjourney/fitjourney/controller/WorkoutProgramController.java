@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -41,6 +42,7 @@ public class WorkoutProgramController {
         NutritionPlanRequestDto nutritionPlanForm = new NutritionPlanRequestDto();
         nutritionPlanForm.setProgramId(id);
         model.addAttribute("mealEntryForm", new MealEntryRequestDto());
+        model.addAttribute("daysOfWeek", List.of("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"));
         model.addAttribute("program", program);
         model.addAttribute("nutritionPlan", nutritionIntegrationService.findPlanByProgramId(id).orElse(null));
         model.addAttribute("nutritionPlanForm", nutritionPlanForm);

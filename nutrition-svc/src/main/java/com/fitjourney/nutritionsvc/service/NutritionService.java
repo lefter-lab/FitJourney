@@ -74,6 +74,7 @@ public class NutritionService {
         response.setDescription(plan.getDescription());
         response.setDailyCalories(plan.getDailyCalories());
         response.setProgramId(plan.getProgramId());
+        response.setMeals(mealEntryRepository.findAllByNutritionPlanId(plan.getId()).stream().map(this::mapToMealResponse).toList());
         return response;
     }
 

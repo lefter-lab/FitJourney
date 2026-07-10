@@ -3,6 +3,7 @@ package com.fitjourney.fitjourney.client.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -14,4 +15,5 @@ public class NutritionPlanResponseDto {
     private String name;
     private String description;
     private Integer dailyCalories;
+    private List<MealEntryResponseDto> meals;
 }
