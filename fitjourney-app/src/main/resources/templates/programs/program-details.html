@@ -205,6 +205,16 @@
                     </div>
 
                     <div class="col-md-6">
+                        <label for="mealCalories" class="form-label">Calories</label>
+                        <input type="number"
+                               id="mealCalories"
+                               th:field="*{calories}"
+                               class="form-control"
+                               placeholder="Enter calories"
+                               min="1">
+                    </div>
+
+                    <div class="col-md-6">
                         <label for="mealProtein" class="form-label">Protein</label>
                         <input type="number"
                                id="mealProtein"
