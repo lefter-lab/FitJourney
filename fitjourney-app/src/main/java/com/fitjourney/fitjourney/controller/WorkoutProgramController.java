@@ -1,5 +1,6 @@
 package com.fitjourney.fitjourney.controller;
 
+import com.fitjourney.fitjourney.client.dto.NutritionPlanRequestDto;
 import com.fitjourney.fitjourney.dto.WorkoutProgramDto;
 import com.fitjourney.fitjourney.entity.User;
 import com.fitjourney.fitjourney.entity.WorkoutProgram;
@@ -36,9 +37,34 @@ public class WorkoutProgramController {
     @GetMapping("/{id}")
     public String showProgramDetails(@PathVariable UUID id, Model model) {
         WorkoutProgram program = workoutProgramService.findById(id);
+        NutritionPlanRequestDto nutritionPlanForm = new NutritionPlanRequestDto();
+        nutritionPlanForm.setProgramId(id);
         model.addAttribute("program", program);
         model.addAttribute("nutritionPlan", nutritionIntegrationService.findPlanByProgramId(id).orElse(null));
+        model.addAttribute("nutritionPlanForm", nutritionPlanForm);
         return "programs/program-details";
+    }
+
+    @PreAuthorize("hasRole('TRAINER') or hasRole('ADMIN')")
+    @PostMapping("/{id}/nutrition-plan")
+    public String createNutritionPlan(@PathVariable UUID id,
+                                      @Valid @ModelAttribute("nutritionPlanForm") NutritionPlanRequestDto nutritionPlanForm,
+                                      BindingResult bindingResult,
+                                      RedirectAttributes redirectAttributes) {
+        nutritionPlanForm.setProgramId(id);
+
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("nutritionPlanError", "Please correct the nutrition plan form.");
+            return "redirect:/programs/" + id;
+        }
+
+        if (nutritionIntegrationService.createPlan(nutritionPlanForm).isPresent()) {
+            redirectAttributes.addFlashAttribute("successMessage", "Nutrition plan created successfully.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Nutrition plan could not be created right now.");
+        }
+
+        return "redirect:/programs/" + id;
     }
 
     @PreAuthorize("hasRole('TRAINER')")

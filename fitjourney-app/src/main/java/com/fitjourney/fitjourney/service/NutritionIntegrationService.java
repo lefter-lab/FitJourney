@@ -1,6 +1,7 @@
 package com.fitjourney.fitjourney.service;
 
 import com.fitjourney.fitjourney.client.NutritionClient;
+import com.fitjourney.fitjourney.client.dto.NutritionPlanRequestDto;
 import com.fitjourney.fitjourney.client.dto.NutritionPlanResponseDto;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,15 @@ public class NutritionIntegrationService {
             return Optional.empty();
         } catch (RuntimeException exception) {
             log.warn("Nutrition service is currently unavailable for program ID: {}", programId, exception);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<NutritionPlanResponseDto> createPlan(NutritionPlanRequestDto dto) {
+        try {
+            return Optional.ofNullable(nutritionClient.createPlan(dto));
+        } catch (FeignException exception) {
+            log.warn("Nutrition service failed to create plan for program ID: {}", dto.getProgramId());
             return Optional.empty();
         }
     }

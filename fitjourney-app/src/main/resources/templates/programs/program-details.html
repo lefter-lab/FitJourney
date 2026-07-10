@@ -38,6 +38,20 @@
 
 <main class="container fj-main">
 
+    <div class="fj-flash-group mb-3">
+        <div th:if="${successMessage}"
+             class="alert alert-success"
+             th:text="${successMessage}"></div>
+
+        <div th:if="${errorMessage}"
+             class="alert alert-danger"
+             th:text="${errorMessage}"></div>
+
+        <div th:if="${nutritionPlanError}"
+             class="alert alert-danger"
+             th:text="${nutritionPlanError}"></div>
+    </div>
+
     <div class="card fj-program-card shadow-sm">
 
         <div class="card-body">
@@ -83,6 +97,55 @@
 
             <div th:if="${nutritionPlan == null}" class="alert alert-info mb-0">
                 No nutrition plan is currently available for this workout program.
+            </div>
+
+            <div th:if="${nutritionPlan == null}"
+                 sec:authorize="hasAnyRole('TRAINER','ADMIN')"
+                 class="mt-4">
+                <hr class="my-4">
+
+                <h4 class="mb-3">Create Nutrition Plan</h4>
+
+                <form th:action="@{/programs/{id}/nutrition-plan(id=${program.id})}"
+                      method="post"
+                      th:object="${nutritionPlanForm}"
+                      class="row g-3">
+
+                    <div class="col-12">
+                        <label for="nutritionPlanName" class="form-label">Plan Name</label>
+                        <input type="text"
+                               id="nutritionPlanName"
+                               th:field="*{name}"
+                               class="form-control"
+                               placeholder="Enter plan name">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="nutritionPlanDescription" class="form-label">Description</label>
+                        <textarea id="nutritionPlanDescription"
+                                  th:field="*{description}"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="Enter plan description"></textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="nutritionPlanDailyCalories" class="form-label">Daily Calories</label>
+                        <input type="number"
+                               id="nutritionPlanDailyCalories"
+                               th:field="*{dailyCalories}"
+                               class="form-control"
+                               min="1"
+                               placeholder="Enter daily calories">
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            Create Nutrition Plan
+                        </button>
+                    </div>
+
+                </form>
             </div>
 
         </div>
