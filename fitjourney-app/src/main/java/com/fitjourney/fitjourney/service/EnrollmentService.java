@@ -55,14 +55,31 @@ public class EnrollmentService {
         enrollmentRepository.save(enrollment);
     }
 
-    public void updateExpiredEnrollments() {
+    public void updateCompletedEnrollments() {
         List<Enrollment> enrollments = enrollmentRepository.findAll();
 
         enrollments.stream()
+                .filter(e -> e.getStatus() == EnrollmentStatus.ACTIVE)
                 .filter(e -> e.getProgressPercentage() >= 100)
                 .forEach(e -> {
                     e.setStatus(EnrollmentStatus.COMPLETED);
                     enrollmentRepository.save(e);
+                    log.info("Enrollment with ID '{}' was marked as completed.", e.getId());
+                });
+    }
+
+    public void expireOverdueEnrollments() {
+        List<Enrollment> enrollments = enrollmentRepository.findAll();
+        LocalDateTime now = LocalDateTime.now();
+
+        enrollments.stream()
+                .filter(e -> e.getStatus() == EnrollmentStatus.ACTIVE)
+                .filter(e -> e.getProgressPercentage() < 100)
+                .filter(e -> e.getEnrolledAt().plusWeeks(e.getWorkoutProgram().getDurationWeeks()).isBefore(now))
+                .forEach(e -> {
+                    e.setStatus(EnrollmentStatus.EXPIRED);
+                    enrollmentRepository.save(e);
+                    log.info("Enrollment with ID '{}' was marked as expired.", e.getId());
                 });
     }
 }

@@ -85,15 +85,4 @@ public class WorkoutProgramService {
         }
     }
 
-    @CacheEvict(value = "programs", allEntries = true)
-    public void archiveInactivePrograms() {
-        List<WorkoutProgram> programs = workoutProgramRepository.findAllByActiveTrue();
-
-        programs.stream()
-                .filter(p -> p.getDurationWeeks() < 1)
-                .forEach(p -> {
-                    p.setActive(false);
-                    workoutProgramRepository.save(p);
-                });
-    }
 }
