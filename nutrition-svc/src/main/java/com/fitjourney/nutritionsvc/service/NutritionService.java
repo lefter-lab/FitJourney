@@ -64,6 +64,7 @@ public class NutritionService {
         entry.setNutritionPlan(plan);
 
         MealEntry savedEntry = mealEntryRepository.save(entry);
+        log.info("Meal '{}' successfully added to nutrition plan ID: {}", savedEntry.getMealName(), planId);
         return mapToMealResponse(savedEntry);
     }
 
