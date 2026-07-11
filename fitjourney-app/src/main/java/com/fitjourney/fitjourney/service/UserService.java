@@ -1,6 +1,7 @@
 package com.fitjourney.fitjourney.service;
 
 import com.fitjourney.fitjourney.dto.RegisterDto;
+import com.fitjourney.fitjourney.dto.ProfileDto;
 import com.fitjourney.fitjourney.entity.User;
 import com.fitjourney.fitjourney.enums.UserRole;
 import com.fitjourney.fitjourney.exception.UserNotFoundException;
@@ -54,6 +55,34 @@ public class UserService implements UserDetailsService {
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public ProfileDto getProfile(String username) {
+        User user = findByUsername(username);
+
+        ProfileDto profileDto = new ProfileDto();
+        profileDto.setUsername(user.getUsername());
+        profileDto.setEmail(user.getEmail());
+        profileDto.setFirstName(user.getFirstName());
+        profileDto.setLastName(user.getLastName());
+        return profileDto;
+    }
+
+    public void updateProfile(String currentUsername, ProfileDto profileDto) {
+        User currentUser = findByUsername(currentUsername);
+
+        userRepository.findByEmail(profileDto.getEmail())
+                .filter(existingUser -> !existingUser.getId().equals(currentUser.getId()))
+                .ifPresent(existingUser -> {
+                    throw new IllegalArgumentException("Email is already in use");
+                });
+
+        currentUser.setEmail(profileDto.getEmail());
+        currentUser.setFirstName(profileDto.getFirstName());
+        currentUser.setLastName(profileDto.getLastName());
+
+        userRepository.save(currentUser);
+        log.info("User profile updated successfully for username: {}", currentUsername);
     }
 
     public void changeRole(UUID id, UserRole role) {
