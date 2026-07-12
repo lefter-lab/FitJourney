@@ -1,331 +1,186 @@
-# 🏋️ FitJourney
+# FitJourney
 
-FitJourney is a fitness and workout tracking platform built with Spring Boot.
+## 1. Project title and overview
 
-The application allows trainers to create workout programs, while users can enroll, track their progress, and submit reviews.
+FitJourney is a fitness and workout tracking platform composed of two independent Spring Boot applications:
 
----
+- `fitjourney-app` - the main Spring MVC + Thymeleaf web application
+- `nutrition-svc` - a REST microservice for nutrition plans and meals
 
-## Course Context
+The platform supports workout program management, user enrollments, progress tracking, reviews, profile editing, and nutrition plan coordination across the two applications.
 
-This project was developed as an individual project assignment for the Spring Fundamentals course at SoftUni.
+## 2. Course context
 
-The project demonstrates the practical application of Spring Boot fundamentals, including MVC architecture, Thymeleaf views, Spring Data JPA, Spring Security, validation, role-based access control, and basic CRUD functionality.
+This project was developed for **Spring Advanced - June 2026 @ SoftUni**.
 
----
+## 3. Architecture
 
-# Tech Stack
+- The main application runs on port `8080`
+- The nutrition service runs on port `8081`
+- The applications communicate through **OpenFeign**
+- Each application uses its own MySQL database
+- The main application can continue to operate when the nutrition service is unavailable through graceful degradation in the integration layer
 
-| Layer           | Technology                  |
-| --------------- | --------------------------- |
-| Language        | Java 17                     |
-| Framework       | Spring Boot 3.4.0           |
-| Build Tool      | Maven                       |
-| Database        | MySQL                       |
-| ORM             | Spring Data JPA / Hibernate |
-| Backend         | Spring Framework            |
-| Frontend        | Spring MVC + Thymeleaf      |
-| UI              | HTML, CSS, Bootstrap        |
-| Security        | Spring Security, BCrypt     |
-| Scheduling      | Spring @Scheduled           |
-| Caching         | Spring @Cacheable           |
-| Version Control | Git / GitHub                |
-
----
-
-# Features
-
-* User registration and login with BCrypt password hashing
-* Session-based authentication with `user_id` stored in session
-* Role-based access control (USER, TRAINER, ADMIN)
-* Trainers can create, edit, deactivate, and delete workout programs
-* Users can enroll in workout programs
-* Users can update enrollment progress
-* Users can submit reviews and ratings
-* Duplicate enrollments are prevented
-* Duplicate reviews are prevented
-* Trainer ownership checks are enforced
-* Cached program listings
-* Scheduled background tasks
-
----
-
-# Functionalities
-
-| # | Functionality              | Method | Endpoint                               | Role    |
-| - | -------------------------- | ------ | -------------------------------------- | ------- |
-| 1 | Create workout program     | POST   | `/programs/create`                     | TRAINER |
-| 2 | Edit workout program       | POST   | `/programs/{id}/edit`                  | TRAINER |
-| 3 | Deactivate workout program | POST   | `/programs/{id}/deactivate`            | TRAINER |
-| 4 | Delete workout program     | POST   | `/programs/{id}/delete`                | TRAINER |
-| 5 | Enroll in workout program  | POST   | `/enrollments/{programId}/enroll`      | USER    |
-| 6 | Update enrollment progress | POST   | `/enrollments/{enrollmentId}/progress` | USER    |
-| 7 | Submit review              | POST   | `/reviews/programs/{programId}`        | USER    |
-
----
-
-# Domain Entities
-
-### User
-
-Represents an application user with a specific role.
-
-### WorkoutProgram
-
-Workout program created by a trainer.
-
-### Enrollment
-
-Tracks a user's participation and progress in a workout program.
-
-### WorkoutReview
-
-Stores ratings and reviews submitted by users.
-
----
-
-# Pages
-
-| URL                      | Description             | Access        |
-| ------------------------ | ----------------------- | ------------- |
-| `/`                      | Home page               | Public        |
-| `/register`              | Registration page       | Guest         |
-| `/login`                 | Login page              | Guest         |
-| `/dashboard`             | User dashboard          | Authenticated |
-| `/programs/all`          | Browse workout programs | Authenticated |
-| `/programs/create`       | Create program          | TRAINER       |
-| `/programs/{id}/edit`    | Edit program            | TRAINER       |
-| `/enrollments/my`        | My enrollments          | USER          |
-| `/reviews/programs/{id}` | Program reviews         | Authenticated |
-
----
-
-# Security
-
-* Spring Security authentication and authorization
-* Session-based login
-* Authenticated user's UUID stored in HTTP session
-* BCrypt password hashing
-* Guest users can access only public pages
-* Authenticated users can access protected pages
-* Role checks implemented with Spring Security and `@PreAuthorize`
-* Trainer ownership validation for edit, deactivate, and delete operations
-* USER-only actions restricted to USER role
-
-### Session Authentication
-
-After successful login:
-
-```java
-session.setAttribute("user_id", user.getId());
-```
-
-The authenticated user's UUID is stored in the HTTP session as required by the project specification.
-
----
-
-# Validation and Error Handling
-
-The application uses Jakarta Validation for server-side validation.
-
-Validation is applied to:
-
-* Registration form
-* Workout program creation form
-* Workout program edit form
-* Enrollment progress update form
-* Workout review submission form
-
-Business rules:
-
-* A user cannot enroll twice in the same program
-* Progress must be between 0 and 100
-* A user cannot submit multiple reviews for the same program
-* Trainers cannot modify programs owned by other trainers
-
-Custom exceptions:
-
-* `ProgramNotFoundException`
-* `UserNotFoundException`
-* `EnrollmentNotFoundException`
-* `DuplicateEnrollmentException`
-* `DuplicateReviewException`
-* `UnauthorizedProgramAccessException`
-
----
-
-# Database
-
-* Spring Data JPA
-* UUID primary keys for all entities
-* Relational database (MySQL)
-* BCrypt hashed passwords
-
-Relationships:
-
-* User → WorkoutProgram
-* User → Enrollment
-* WorkoutProgram → Enrollment
-* User → WorkoutReview
-* WorkoutProgram → WorkoutReview
-
----
-
-# Scheduling
-
-### Archive Inactive Programs
-
-Automatically archives inactive workout programs.
-
-### Complete Finished Enrollments
-
-Automatically updates enrollments with 100% progress to COMPLETED status.
-
----
-
-# Caching
-
-Program listings are cached using:
-
-```java
-@Cacheable("programs")
-```
-
-Cache is cleared using:
-
-```java
-@CacheEvict
-```
-
-when programs are created, edited, deactivated, deleted, or archived.
-
----
-
-# Project Structure
+Textual flow:
 
 ```text
-src/main/java/com/fitjourney/fitjourney/
-├── config/
-│   ├── PasswordEncoderConfig.java
-│   └── SecurityConfig.java
-├── controller/
-│   ├── AuthController.java
-│   ├── EnrollmentController.java
-│   ├── HomeController.java
-│   ├── WorkoutProgramController.java
-│   └── WorkoutReviewController.java
-├── dto/
-│   ├── EnrollmentProgressDto.java
-│   ├── RegisterDto.java
-│   ├── WorkoutProgramDto.java
-│   └── WorkoutReviewDto.java
-├── entity/
-│   ├── Enrollment.java
-│   ├── User.java
-│   ├── WorkoutProgram.java
-│   └── WorkoutReview.java
-├── enums/
-│   ├── DifficultyLevel.java
-│   ├── EnrollmentStatus.java
-│   └── UserRole.java
-├── exception/
-│   ├── DuplicateEnrollmentException.java
-│   ├── DuplicateReviewException.java
-│   ├── EnrollmentNotFoundException.java
-│   ├── ProgramNotFoundException.java
-│   ├── UnauthorizedProgramAccessException.java
-│   └── UserNotFoundException.java
-├── repository/
-│   ├── EnrollmentRepository.java
-│   ├── UserRepository.java
-│   ├── WorkoutProgramRepository.java
-│   └── WorkoutReviewRepository.java
-├── scheduler/
-│   └── ScheduledTasks.java
-├── security/
-│   └── CustomAuthenticationSuccessHandler.java
-└── service/
-    ├── EnrollmentService.java
-    ├── UserService.java
-    ├── WorkoutProgramService.java
-    └── WorkoutReviewService.java
+Browser -> fitjourney-app -> OpenFeign -> nutrition-svc
 ```
 
----
+## 4. Tech stack
 
-# Getting Started
+- Java 17
+- Spring Boot 3.4.0
+- Spring MVC
+- Thymeleaf
+- Spring Security
+- Spring Data JPA
+- Hibernate
+- OpenFeign
+- Jakarta Validation
+- MySQL
+- Maven
+- Lombok
+- Bootstrap
+- Spring Caching
+- Spring Scheduling
 
-## Prerequisites
+## 5. Main application features
 
-* Java 17
-* Maven
-* MySQL
+- Registration and authentication
+- USER, TRAINER, and ADMIN roles
+- Profile viewing and editing
+- Workout program creation, editing, deactivation, and deletion
+- Enrollment and progress tracking
+- Reviews and ratings
+- Validation and controlled error pages
+- Cron and fixed-rate scheduled jobs
+- Cached workout program listing
 
-## Setup
+## 6. Nutrition microservice features
 
-Clone repository:
+- Create nutrition plans for workout programs
+- Retrieve nutrition plans
+- Add meals with calories and macronutrients
+- Display meals in the main application
+- Status endpoint for manual health checks
+- Validation and structured JSON errors
 
-```bash
-git clone https://github.com/lefter-lab/FitJourney.git
-cd FitJourney
-```
+## 7. REST integration
 
-Create database:
+| HTTP method | Endpoint | Purpose | Consuming application |
+| --- | --- | --- | --- |
+| GET | `/nutrition/programs/{programId}` | Retrieve the nutrition plan for a workout program | `fitjourney-app` |
+| POST | `/nutrition/programs` | Create a nutrition plan for a workout program | `fitjourney-app` |
+| POST | `/nutrition/plans/{planId}/meals` | Add a meal to an existing nutrition plan | `fitjourney-app` |
+| GET | `/nutrition/status` | Return a simple service status response | Browser / operator |
 
-```sql
-CREATE DATABASE fitjourney;
-```
+## 8. Domain entities
 
-Configure `application.properties`:
+### Main app
+
+- `User`
+- `WorkoutProgram`
+- `Enrollment`
+- `WorkoutReview`
+
+### Nutrition service
+
+- `NutritionPlan`
+- `MealEntry`
+
+## 9. Valid domain functionalities
+
+| Action | Endpoint | Role |
+| --- | --- | --- |
+| Create workout program | `POST /programs/create` | TRAINER |
+| Edit workout program | `POST /programs/{id}/edit` | TRAINER |
+| Deactivate workout program | `POST /programs/{id}/deactivate` | TRAINER |
+| Delete workout program | `POST /programs/{id}/delete` | TRAINER |
+| Enroll in program | `POST /enrollments/{programId}/enroll` | USER |
+| Update enrollment progress | `POST /enrollments/{enrollmentId}/progress` | USER |
+| Submit review | `POST /reviews/programs/{programId}` | USER |
+| Update own profile | `POST /profile` | Authenticated user |
+| Create nutrition plan | `POST /programs/{id}/nutrition-plan` | TRAINER or ADMIN |
+| Add meal | `POST /programs/{programId}/nutrition-plan/{planId}/meals` | TRAINER or ADMIN |
+
+## 10. Security
+
+- BCrypt password hashing is used for stored passwords
+- CSRF protection is enabled by Spring Security
+- Public pages are available only where explicitly permitted
+- Authenticated pages require login
+- Role-restricted endpoints are enforced with Spring Security
+- Method-level authorization is used with `@PreAuthorize`
+- Users can view and edit only their own profile data
+- ADMIN users can manage user roles through the admin panel
+
+## 11. Validation and error handling
+
+### Main app
+
+- Jakarta Validation is used on DTOs and form inputs
+- Service-level rules protect against invalid business operations
+- Custom exceptions are used for domain-specific error cases
+- HTML error pages are available for controlled failures
+
+### Nutrition service
+
+- DTO and entity validation are used for nutrition requests
+- Structured JSON error responses are returned through a global exception handler
+- Domain-specific exceptions are handled centrally
+
+## 12. Scheduling and caching
+
+### Scheduled jobs
+
+- A cron job marks overdue active enrollments as `EXPIRED`
+- A fixed-rate job marks active enrollments with 100% progress as `COMPLETED`
+
+### Caching
+
+- Workout program listings are cached with `@Cacheable("programs")`
+- Cache entries are cleared with `@CacheEvict` after create, update, deactivate, and delete operations
+
+## 13. Databases
+
+The project uses two separate MySQL databases:
+
+- `fitjourney`
+- `fitjourney_nutrition`
+
+Primary keys are UUID-based in both applications.
+
+## 14. Setup and startup
+
+1. Clone the repository.
+2. Create the two MySQL databases.
+3. Configure credentials in both `application.properties` files.
+4. Start `nutrition-svc`.
+5. Start `fitjourney-app`.
+6. Open the main application at `http://localhost:8080`.
+7. Check the microservice status at `http://localhost:8081/nutrition/status`.
+
+Example database configuration:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/fitjourney
+spring.datasource.url=jdbc:mysql://localhost:3306/your_database
 spring.datasource.username=YOUR_DB_USERNAME
 spring.datasource.password=YOUR_DB_PASSWORD
-spring.jpa.hibernate.ddl-auto=update
 ```
 
-Run application:
+## 15. Testing
 
-```bash
-mvn spring-boot:run
-```
+The automated test suite is being expanded.
 
-Open:
+## 16. Repository structure
 
 ```text
-http://localhost:8080
-```
-## Test Roles Setup
-
-Newly registered accounts receive the USER role by default.
-
-To test TRAINER and ADMIN functionality, update the desired user role directly in the database after registration.
-
-Example
-
-```sql
-UPDATE users
-SET role = 'TRAINER'
-WHERE username = 'trainer';
-
-UPDATE users
-SET role = 'ADMIN'
-WHERE username = 'admin';
+fitjourney-app/
+nutrition-svc/
+README.md
 ```
 
-Recommended Test Accounts
-Register a regular user account through /register.
-Register a trainer account through /register, then update its role to TRAINER.
-Register an admin account through /register, then update its role to ADMIN.
+## 17. Git
 
-After changing roles in the database, log out and log in again for the new permissions to take effect.
----
-
-# GitHub
-
-https://github.com/lefter-lab/FitJourney
-
-## License / Course Project
-
-This project was developed for educational purposes as part of the Spring Fundamentals course at SoftUni.
+Commit messages follow Conventional Commits.
