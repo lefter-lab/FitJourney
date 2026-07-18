@@ -14,6 +14,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -181,6 +183,34 @@ class UserServiceTest {
                 .hasMessage("User not found");
 
         verify(userRepository, never()).save(org.mockito.ArgumentMatchers.any(User.class));
+    }
+
+    @Test
+    void loadUserByUsername_shouldReturnUserDetailsWhenUserExists() {
+        User user = user(UUID.randomUUID(), "johnny", "john@example.com", "John", "Doe", UserRole.TRAINER);
+        user.setPassword("encoded-password");
+        when(userRepository.findByUsername("johnny")).thenReturn(Optional.of(user));
+
+        UserDetails result = userService.loadUserByUsername("johnny");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getUsername()).isEqualTo("johnny");
+        assertThat(result.getPassword()).isEqualTo("encoded-password");
+        assertThat(result.getAuthorities())
+                .extracting("authority")
+                .containsExactly("ROLE_TRAINER");
+        verify(userRepository, times(1)).findByUsername("johnny");
+    }
+
+    @Test
+    void loadUserByUsername_shouldThrowWhenUserMissing() {
+        when(userRepository.findByUsername("missing")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.loadUserByUsername("missing"))
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessage("User not found: missing");
+
+        verify(userRepository, times(1)).findByUsername("missing");
     }
 
     private static RegisterDto registerDto(String username, String email, String password, String firstName, String lastName) {
