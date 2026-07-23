@@ -2,6 +2,7 @@ package com.fitjourney.fitjourney.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,6 +27,15 @@ public class GlobalExceptionHandler {
         log.warn("Access denied exception caught: {}", ex.getMessage());
         ModelAndView modelAndView = new ModelAndView("error/403");
         modelAndView.addObject("message", ex.getMessage());
+        return modelAndView;
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ModelAndView handleAccessDeniedException(AccessDeniedException ex) {
+        log.warn("Security access denied exception caught: {}", ex.getMessage());
+        ModelAndView modelAndView = new ModelAndView("error/403");
+        modelAndView.addObject("message", "You do not have permission to access this resource.");
         return modelAndView;
     }
 
