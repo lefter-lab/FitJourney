@@ -80,7 +80,7 @@ public class EnrollmentController {
             return "enrollments/my-enrollments";
         }
 
-        enrollmentService.updateProgress(enrollmentId, progressDto.getPercentage());
+        enrollmentService.updateProgress(enrollmentId, progressDto.getPercentage(), principal.getName());
         return "redirect:/enrollments/my";
     }
 }

@@ -60,6 +60,7 @@ public class WorkoutProgramService {
         program.setPrice(BigDecimal.valueOf(dto.getPrice()));
 
         workoutProgramRepository.save(program);
+        log.info("Workout program with ID '{}' was updated.", id);
     }
 
     @CacheEvict(value = "programs", allEntries = true)
@@ -69,6 +70,7 @@ public class WorkoutProgramService {
         program.setActive(false);
 
         workoutProgramRepository.save(program);
+        log.info("Workout program with ID '{}' was deactivated.", id);
     }
 
     @CacheEvict(value = "programs", allEntries = true)

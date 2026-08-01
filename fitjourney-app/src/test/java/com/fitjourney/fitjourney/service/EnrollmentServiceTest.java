@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -82,13 +83,13 @@ class EnrollmentServiceTest {
     }
 
     @Test
-    void updateProgress_shouldUpdateAndSaveEnrollment() {
+    void updateProgress_shouldUpdateWhenEnrollmentBelongsToUser() {
         UUID enrollmentId = UUID.randomUUID();
         Enrollment enrollment = enrollment(UUID.randomUUID(), user(UUID.randomUUID(), "john"), program(UUID.randomUUID(), "Program"));
         enrollment.setId(enrollmentId);
         when(enrollmentRepository.findById(enrollmentId)).thenReturn(Optional.of(enrollment));
 
-        enrollmentService.updateProgress(enrollmentId, 75);
+        enrollmentService.updateProgress(enrollmentId, 75, "john");
 
         ArgumentCaptor<Enrollment> captor = ArgumentCaptor.forClass(Enrollment.class);
         verify(enrollmentRepository, times(1)).save(captor.capture());
@@ -98,11 +99,24 @@ class EnrollmentServiceTest {
     }
 
     @Test
+    void updateProgress_shouldThrowAccessDeniedWhenEnrollmentBelongsToAnotherUser() {
+        UUID enrollmentId = UUID.randomUUID();
+        Enrollment enrollment = enrollment(enrollmentId, user(UUID.randomUUID(), "owner"), program(UUID.randomUUID(), "Program"));
+        when(enrollmentRepository.findById(enrollmentId)).thenReturn(Optional.of(enrollment));
+
+        assertThatThrownBy(() -> enrollmentService.updateProgress(enrollmentId, 75, "other-user"))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("You can only update your own enrollment progress");
+
+        verify(enrollmentRepository, never()).save(org.mockito.ArgumentMatchers.any(Enrollment.class));
+    }
+
+    @Test
     void updateProgress_shouldThrowEnrollmentNotFoundExceptionWhenMissing() {
         UUID enrollmentId = UUID.randomUUID();
         when(enrollmentRepository.findById(enrollmentId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> enrollmentService.updateProgress(enrollmentId, 75))
+        assertThatThrownBy(() -> enrollmentService.updateProgress(enrollmentId, 75, "john"))
                 .isInstanceOf(EnrollmentNotFoundException.class)
                 .hasMessage("Enrollment not found");
 

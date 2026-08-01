@@ -31,6 +31,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -193,7 +194,7 @@ class EnrollmentControllerTest {
 
     @Test
     @WithMockUser(username = "johnny", roles = "USER")
-    void updateProgress_shouldRedirectToMyEnrollmentsWhenProgressIsValid() throws Exception {
+    void updateProgress_shouldPassAuthenticatedUsernameToServiceWhenProgressIsValid() throws Exception {
         UUID enrollmentId = UUID.randomUUID();
 
         mockMvc.perform(post("/enrollments/{enrollmentId}/progress", enrollmentId)
@@ -202,7 +203,7 @@ class EnrollmentControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/enrollments/my"));
 
-        verify(enrollmentService, times(1)).updateProgress(enrollmentId, 75);
+        verify(enrollmentService, times(1)).updateProgress(enrollmentId, 75, "johnny");
     }
 
     @Test
@@ -225,7 +226,7 @@ class EnrollmentControllerTest {
                 .andExpect(model().attribute("progressError", "Progress must be at most 100"))
                 .andExpect(model().attributeHasFieldErrors("progressDto", "percentage"));
 
-        verify(enrollmentService, never()).updateProgress(any(), anyInt());
+        verify(enrollmentService, never()).updateProgress(any(), anyInt(), anyString());
         verify(userService, times(1)).findByUsername("johnny");
         verify(enrollmentService, times(1)).getEnrollmentsByUser(user);
     }
@@ -236,7 +237,7 @@ class EnrollmentControllerTest {
         UUID enrollmentId = UUID.randomUUID();
         doThrow(new EnrollmentNotFoundException("Enrollment not found"))
                 .when(enrollmentService)
-                .updateProgress(enrollmentId, 50);
+                .updateProgress(enrollmentId, 50, "johnny");
 
         mockMvc.perform(post("/enrollments/{enrollmentId}/progress", enrollmentId)
                         .with(csrf())
@@ -244,6 +245,8 @@ class EnrollmentControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(view().name("error/404"))
                 .andExpect(model().attribute("message", "Enrollment not found"));
+
+        verify(enrollmentService, times(1)).updateProgress(enrollmentId, 50, "johnny");
     }
 
     @Test
@@ -254,7 +257,7 @@ class EnrollmentControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("**/login"));
 
-        verify(enrollmentService, never()).updateProgress(any(), anyInt());
+        verify(enrollmentService, never()).updateProgress(any(), anyInt(), anyString());
     }
 
     @Test
@@ -266,7 +269,7 @@ class EnrollmentControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(view().name("error/403"));
 
-        verify(enrollmentService, never()).updateProgress(any(), anyInt());
+        verify(enrollmentService, never()).updateProgress(any(), anyInt(), anyString());
     }
 
     private static User user(UUID id, String username, UserRole role) {

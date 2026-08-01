@@ -9,6 +9,7 @@ import com.fitjourney.fitjourney.exception.EnrollmentNotFoundException;
 import com.fitjourney.fitjourney.repository.EnrollmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -47,12 +48,17 @@ public class EnrollmentService {
         return enrollmentRepository.findAllByUserId(user.getId());
     }
 
-    public void updateProgress(UUID enrollmentId, int percentage) {
+    public void updateProgress(UUID enrollmentId, int percentage, String username) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found"));
 
+        if (!enrollment.getUser().getUsername().equals(username)) {
+            throw new AccessDeniedException("You can only update your own enrollment progress");
+        }
+
         enrollment.setProgressPercentage(percentage);
         enrollmentRepository.save(enrollment);
+        log.info("Enrollment '{}' progress updated to {}% by user '{}'.", enrollmentId, percentage, username);
     }
 
     public void updateCompletedEnrollments() {
