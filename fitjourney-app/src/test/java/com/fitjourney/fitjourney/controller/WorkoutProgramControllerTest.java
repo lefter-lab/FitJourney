@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -402,11 +403,11 @@ class WorkoutProgramControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "TRAINER")
+    @WithMockUser(username = "trainer", roles = "TRAINER")
     void createNutritionPlan_shouldRedirectWithSuccessMessageWhenPlanIsCreated() throws Exception {
         UUID programId = UUID.randomUUID();
         NutritionPlanResponseDto responseDto = nutritionPlanResponse(programId);
-        when(nutritionIntegrationService.createPlan(any(NutritionPlanRequestDto.class)))
+        when(nutritionIntegrationService.createPlan(eq(programId), any(NutritionPlanRequestDto.class), eq("trainer")))
                 .thenReturn(Optional.of(responseDto));
 
         mockMvc.perform(post("/programs/{id}/nutrition-plan", programId)
@@ -420,17 +421,17 @@ class WorkoutProgramControllerTest {
                 .andExpect(flash().attribute("successMessage", "Nutrition plan created successfully."));
 
         ArgumentCaptor<NutritionPlanRequestDto> captor = ArgumentCaptor.forClass(NutritionPlanRequestDto.class);
-        verify(nutritionIntegrationService, times(1)).createPlan(captor.capture());
+        verify(nutritionIntegrationService, times(1)).createPlan(eq(programId), captor.capture(), eq("trainer"));
         assertThat(captor.getValue().getProgramId()).isEqualTo(programId);
         assertThat(captor.getValue().getName()).isEqualTo("Balanced Plan");
         assertThat(captor.getValue().getDailyCalories()).isEqualTo(2200);
     }
 
     @Test
-    @WithMockUser(roles = "TRAINER")
+    @WithMockUser(username = "trainer", roles = "TRAINER")
     void createNutritionPlan_shouldRedirectWithErrorMessageWhenIntegrationReturnsEmpty() throws Exception {
         UUID programId = UUID.randomUUID();
-        when(nutritionIntegrationService.createPlan(any(NutritionPlanRequestDto.class))).thenReturn(Optional.empty());
+        when(nutritionIntegrationService.createPlan(eq(programId), any(NutritionPlanRequestDto.class), eq("trainer"))).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/programs/{id}/nutrition-plan", programId)
                         .with(csrf())
@@ -458,7 +459,7 @@ class WorkoutProgramControllerTest {
                 .andExpect(redirectedUrl("/programs/" + programId))
                 .andExpect(flash().attribute("nutritionPlanError", "Please correct the nutrition plan form."));
 
-        verify(nutritionIntegrationService, never()).createPlan(any(NutritionPlanRequestDto.class));
+        verify(nutritionIntegrationService, never()).createPlan(any(), any(NutritionPlanRequestDto.class), anyString());
     }
 
     @Test
@@ -476,12 +477,12 @@ class WorkoutProgramControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "TRAINER")
+    @WithMockUser(username = "trainer", roles = "TRAINER")
     void addMealToNutritionPlan_shouldRedirectWithSuccessMessageWhenMealIsAdded() throws Exception {
         UUID programId = UUID.randomUUID();
         UUID planId = UUID.randomUUID();
         MealEntryResponseDto responseDto = mealEntryResponse();
-        when(nutritionIntegrationService.addMealToPlan(eq(planId), any(MealEntryRequestDto.class)))
+        when(nutritionIntegrationService.addMealToPlan(eq(programId), eq(planId), any(MealEntryRequestDto.class), eq("trainer")))
                 .thenReturn(Optional.of(responseDto));
 
         mockMvc.perform(post("/programs/{programId}/nutrition-plan/{planId}/meals", programId, planId)
@@ -497,7 +498,7 @@ class WorkoutProgramControllerTest {
                 .andExpect(flash().attribute("successMessage", "Meal added successfully."));
 
         ArgumentCaptor<MealEntryRequestDto> captor = ArgumentCaptor.forClass(MealEntryRequestDto.class);
-        verify(nutritionIntegrationService, times(1)).addMealToPlan(eq(planId), captor.capture());
+        verify(nutritionIntegrationService, times(1)).addMealToPlan(eq(programId), eq(planId), captor.capture(), eq("trainer"));
         assertThat(captor.getValue().getMealName()).isEqualTo("Breakfast");
         assertThat(captor.getValue().getCalories()).isEqualTo(500);
         assertThat(captor.getValue().getProtein()).isEqualTo(30);
@@ -507,11 +508,11 @@ class WorkoutProgramControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "TRAINER")
+    @WithMockUser(username = "trainer", roles = "TRAINER")
     void addMealToNutritionPlan_shouldRedirectWithErrorMessageWhenIntegrationReturnsEmpty() throws Exception {
         UUID programId = UUID.randomUUID();
         UUID planId = UUID.randomUUID();
-        when(nutritionIntegrationService.addMealToPlan(eq(planId), any(MealEntryRequestDto.class)))
+        when(nutritionIntegrationService.addMealToPlan(eq(programId), eq(planId), any(MealEntryRequestDto.class), eq("trainer")))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(post("/programs/{programId}/nutrition-plan/{planId}/meals", programId, planId)
@@ -545,7 +546,7 @@ class WorkoutProgramControllerTest {
                 .andExpect(redirectedUrl("/programs/" + programId))
                 .andExpect(flash().attribute("errorMessage", "Please correct the meal form."));
 
-        verify(nutritionIntegrationService, never()).addMealToPlan(any(), any(MealEntryRequestDto.class));
+        verify(nutritionIntegrationService, never()).addMealToPlan(any(), any(), any(MealEntryRequestDto.class), anyString());
     }
 
     @Test

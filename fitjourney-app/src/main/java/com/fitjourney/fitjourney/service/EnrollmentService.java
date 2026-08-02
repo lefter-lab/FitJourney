@@ -49,6 +49,10 @@ public class EnrollmentService {
     }
 
     public void updateProgress(UUID enrollmentId, int percentage, String username) {
+        if (percentage < 0 || percentage > 100) {
+            throw new IllegalArgumentException("Progress percentage must be between 0 and 100");
+        }
+
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment not found"));
 

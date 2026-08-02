@@ -54,7 +54,8 @@ public class WorkoutProgramController {
     public String createNutritionPlan(@PathVariable UUID id,
                                       @Valid @ModelAttribute("nutritionPlanForm") NutritionPlanRequestDto nutritionPlanForm,
                                       BindingResult bindingResult,
-                                      RedirectAttributes redirectAttributes) {
+                                      RedirectAttributes redirectAttributes,
+                                      Principal principal) {
         nutritionPlanForm.setProgramId(id);
 
         if (bindingResult.hasErrors()) {
@@ -62,7 +63,7 @@ public class WorkoutProgramController {
             return "redirect:/programs/" + id;
         }
 
-        if (nutritionIntegrationService.createPlan(nutritionPlanForm).isPresent()) {
+        if (nutritionIntegrationService.createPlan(id, nutritionPlanForm, principal.getName()).isPresent()) {
             redirectAttributes.addFlashAttribute("successMessage", "Nutrition plan created successfully.");
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Nutrition plan could not be created right now.");
@@ -77,13 +78,14 @@ public class WorkoutProgramController {
                                          @PathVariable UUID planId,
                                          @Valid @ModelAttribute("mealEntryForm") MealEntryRequestDto mealEntryForm,
                                          BindingResult bindingResult,
-                                         RedirectAttributes redirectAttributes) {
+                                         RedirectAttributes redirectAttributes,
+                                         Principal principal) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Please correct the meal form.");
             return "redirect:/programs/" + programId;
         }
 
-        if (nutritionIntegrationService.addMealToPlan(planId, mealEntryForm).isPresent()) {
+        if (nutritionIntegrationService.addMealToPlan(programId, planId, mealEntryForm, principal.getName()).isPresent()) {
             redirectAttributes.addFlashAttribute("successMessage", "Meal added successfully.");
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Meal could not be added right now.");

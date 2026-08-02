@@ -123,6 +123,30 @@ class EnrollmentServiceTest {
         verify(enrollmentRepository, never()).save(org.mockito.ArgumentMatchers.any(Enrollment.class));
     }
 
+    @Test
+    void updateProgress_shouldRejectPercentageBelowZero() {
+        UUID enrollmentId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> enrollmentService.updateProgress(enrollmentId, -1, "john"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Progress percentage must be between 0 and 100");
+
+        verify(enrollmentRepository, never()).findById(org.mockito.ArgumentMatchers.any());
+        verify(enrollmentRepository, never()).save(org.mockito.ArgumentMatchers.any(Enrollment.class));
+    }
+
+    @Test
+    void updateProgress_shouldRejectPercentageAboveOneHundred() {
+        UUID enrollmentId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> enrollmentService.updateProgress(enrollmentId, 101, "john"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Progress percentage must be between 0 and 100");
+
+        verify(enrollmentRepository, never()).findById(org.mockito.ArgumentMatchers.any());
+        verify(enrollmentRepository, never()).save(org.mockito.ArgumentMatchers.any(Enrollment.class));
+    }
+
     private static Enrollment enrollment(UUID id, User user, WorkoutProgram program) {
         Enrollment enrollment = new Enrollment();
         enrollment.setId(id);
