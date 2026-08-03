@@ -173,19 +173,19 @@ The project uses two separate MySQL databases:
 
 Primary keys are UUID-based in both applications.
 
-Local evaluation configuration:
+Local configuration:
 
-- MySQL username: `root`
-- MySQL password: `1234`
 - MySQL port: `3306`
 - Main application port: `8080`
 - Nutrition microservice port: `8081`
+
+The database connection settings are already defined in each application's `application.properties` file.
 
 ## 14. Setup and startup
 
 1. Clone the repository.
 2. Create the two MySQL databases.
-3. Verify that the local MySQL server is available with username `root` and password `1234`, which are already configured in both `application.properties` files.
+3. Verify that the local MySQL server matches the connection settings defined in both `application.properties` files.
 4. Start `nutrition-svc`.
 5. Start `fitjourney-app`.
 6. Open the main application at `http://localhost:8080`.
@@ -202,8 +202,6 @@ Main application configuration:
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/fitjourney
-spring.datasource.username=root
-spring.datasource.password=1234
 nutrition.service.url=http://localhost:8081/nutrition
 ```
 
@@ -212,8 +210,6 @@ Nutrition microservice configuration:
 ```properties
 server.port=8081
 spring.datasource.url=jdbc:mysql://localhost:3306/fitjourney_nutrition?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=1234
 ```
 
 Start the nutrition microservice from the repository root:
@@ -234,7 +230,7 @@ The recommended startup order is MySQL, `nutrition-svc`, and then `fitjourney-ap
 
 ## 15. Testing
 
-The following results were confirmed for commit `3f9c89e`.
+The following results were confirmed against the application code at commit `3f9c89e`.
 
 ### Main application
 
