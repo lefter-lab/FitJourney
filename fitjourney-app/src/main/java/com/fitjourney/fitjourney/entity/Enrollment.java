@@ -2,6 +2,9 @@ package com.fitjourney.fitjourney.entity;
 
 import com.fitjourney.fitjourney.enums.EnrollmentStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,21 +21,27 @@ public class Enrollment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "program_id", nullable = false)
     private WorkoutProgram workoutProgram;
 
+    @NotNull
     @Column(name = "enrolled_at", nullable = false)
     private LocalDateTime enrolledAt;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EnrollmentStatus status = EnrollmentStatus.ACTIVE;
 
+    @Min(0)
+    @Max(100)
     @Column(name = "progress_percentage", nullable = false)
     private int progressPercentage = 0;
 }
