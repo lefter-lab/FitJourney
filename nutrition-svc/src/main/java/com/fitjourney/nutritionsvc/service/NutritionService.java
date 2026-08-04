@@ -1,9 +1,15 @@
 package com.fitjourney.nutritionsvc.service;
 
-import com.fitjourney.nutritionsvc.dto.*;
-import com.fitjourney.nutritionsvc.entity.*;
-import com.fitjourney.nutritionsvc.exception.*;
-import com.fitjourney.nutritionsvc.repository.*;
+import com.fitjourney.nutritionsvc.dto.MealEntryDto;
+import com.fitjourney.nutritionsvc.dto.MealEntryResponseDto;
+import com.fitjourney.nutritionsvc.dto.NutritionPlanDto;
+import com.fitjourney.nutritionsvc.dto.NutritionPlanResponseDto;
+import com.fitjourney.nutritionsvc.entity.MealEntry;
+import com.fitjourney.nutritionsvc.entity.NutritionPlan;
+import com.fitjourney.nutritionsvc.exception.DuplicatePlanException;
+import com.fitjourney.nutritionsvc.exception.NutritionPlanNotFoundException;
+import com.fitjourney.nutritionsvc.repository.MealEntryRepository;
+import com.fitjourney.nutritionsvc.repository.NutritionPlanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +29,7 @@ public class NutritionService {
     @Transactional
     public NutritionPlanResponseDto createPlan(NutritionPlanDto dto) {
         log.info("Attempting to create nutrition plan for programId: {}", dto.getProgramId());
-        
+
         if (nutritionPlanRepository.existsByProgramId(dto.getProgramId())) {
             log.warn("Nutrition plan already exists for programId: {}", dto.getProgramId());
             throw new DuplicatePlanException("A nutrition plan already exists for this workout program.");
@@ -58,8 +64,7 @@ public class NutritionService {
         entry.setProtein(dto.getProtein());
         entry.setCarbs(dto.getCarbs());
         entry.setFats(dto.getFats());
-        
-       
+
         entry.setDayOfWeek(dto.getDayOfWeek());
         entry.setNutritionPlan(plan);
 

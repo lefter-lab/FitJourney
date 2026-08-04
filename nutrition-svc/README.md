@@ -26,9 +26,8 @@ REST microservice за FitJourney — управление на хранител
 | Method | Endpoint                          | Description                    |
 |--------|-----------------------------------|--------------------------------|
 | GET    | /nutrition/programs/{programId}   | Вземи план за програма         |
-| POST   | /nutrition/plans                  | Създай нов хранителен план     |
+| POST   | /nutrition/programs               | Създай нов хранителен план     |
 | POST   | /nutrition/plans/{id}/meals       | Добави хранене към план        |
-| DELETE | /nutrition/plans/{id}             | Изтрий план                    |
 
 ## Setup
 
@@ -51,4 +50,4 @@ mvn spring-boot:run
 ## Integration с Main App
 
 Комуникацията с main app (FitJourney) се осъществява чрез Feign Client.
-Виж `FEIGN_CLIENT_FOR_MAIN_APP.java` за инструкции.
+The microservice is consumed by the main application through its OpenFeign client.
