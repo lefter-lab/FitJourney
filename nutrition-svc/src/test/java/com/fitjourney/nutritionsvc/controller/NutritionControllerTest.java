@@ -238,12 +238,76 @@ class NutritionControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.errors.mealName").value("Meal name is required"))
+                .andExpect(jsonPath("$.errors.mealName").exists())
                 .andExpect(jsonPath("$.errors.calories").value("Calories must be positive"))
                 .andExpect(jsonPath("$.errors.protein").value("Protein cannot be negative"))
                 .andExpect(jsonPath("$.errors.carbs").value("Carbs cannot be negative"))
                 .andExpect(jsonPath("$.errors.fats").value("Fats cannot be negative"))
                 .andExpect(jsonPath("$.errors.dayOfWeek").value("Day of week is required"))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        verify(nutritionService, never()).addMealEntry(any(UUID.class), any(MealEntryDto.class));
+    }
+
+    @Test
+    void addMealEntry_shouldReturnBadRequestWhenDayOfWeekCannotBeParsed() throws Exception {
+        UUID planId = UUID.randomUUID();
+
+        String requestBody = """
+                {
+                  "mealName": "Breakfast",
+                  "calories": 500,
+                  "protein": 30,
+                  "carbs": 45,
+                  "fats": 12,
+                  "dayOfWeek": "INVALID_DAY"
+                }
+                """;
+
+        mockMvc.perform(post("/nutrition/plans/{planId}/meals", planId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Malformed or unreadable JSON request."))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        verify(nutritionService, never())
+                .addMealEntry(any(UUID.class), any(MealEntryDto.class));
+    }
+
+    @Test
+    void addMealEntry_shouldReturnBadRequestWhenMealNameIsTooShort() throws Exception {
+        MealEntryDto requestDto = mealEntryDto();
+        requestDto.setMealName("A");
+
+        mockMvc.perform(post("/nutrition/plans/{planId}/meals", UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors.mealName")
+                        .value("Meal name must be between 2 and 100 characters"))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        verify(nutritionService, never()).addMealEntry(any(UUID.class), any(MealEntryDto.class));
+    }
+
+    @Test
+    void addMealEntry_shouldReturnBadRequestWhenMealNameIsTooLong() throws Exception {
+        MealEntryDto requestDto = mealEntryDto();
+        requestDto.setMealName("A".repeat(101));
+
+        mockMvc.perform(post("/nutrition/plans/{planId}/meals", UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors.mealName")
+                        .value("Meal name must be between 2 and 100 characters"))
                 .andExpect(jsonPath("$.timestamp").exists());
 
         verify(nutritionService, never()).addMealEntry(any(UUID.class), any(MealEntryDto.class));

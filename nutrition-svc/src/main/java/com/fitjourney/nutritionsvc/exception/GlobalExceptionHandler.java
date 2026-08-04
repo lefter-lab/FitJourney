@@ -2,6 +2,7 @@ package com.fitjourney.nutritionsvc.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -47,6 +48,17 @@ public class GlobalExceptionHandler {
         body.put("status", status.value());
         body.put("message", message);
         return ResponseEntity.status(status).body(body);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex
+    ) {
+        log.warn("Nutrition request contains malformed or unreadable JSON");
+        return buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Malformed or unreadable JSON request."
+        );
     }
 
     @ExceptionHandler(Exception.class)
