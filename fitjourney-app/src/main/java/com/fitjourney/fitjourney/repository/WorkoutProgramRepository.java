@@ -11,7 +11,5 @@ import java.util.UUID;
 public interface WorkoutProgramRepository extends JpaRepository<WorkoutProgram, UUID> {
 
     List<WorkoutProgram> findAllByActiveTrue();
-
-    List<WorkoutProgram> findAllByTrainerId(UUID trainerId);
 }
 

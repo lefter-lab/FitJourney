@@ -66,31 +66,6 @@ class WorkoutProgramRepositoryTest {
     }
 
     @Test
-    void findAllByTrainerId_shouldReturnOnlyProgramsForTrainer() {
-        User firstTrainer = userRepository.save(user("first-trainer", "first@example.com", UserRole.TRAINER));
-        User secondTrainer = userRepository.save(user("second-trainer", "second@example.com", UserRole.TRAINER));
-        userRepository.flush();
-        workoutProgramRepository.save(workoutProgram(firstTrainer, "First Trainer Plan", DifficultyLevel.BEGINNER, true));
-        workoutProgramRepository.save(workoutProgram(secondTrainer, "Second Trainer Plan", DifficultyLevel.ADVANCED, true));
-        workoutProgramRepository.flush();
-
-        List<WorkoutProgram> result = workoutProgramRepository.findAllByTrainerId(firstTrainer.getId());
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getTitle()).isEqualTo("First Trainer Plan");
-        assertThat(result.get(0).getTrainer().getId()).isEqualTo(firstTrainer.getId());
-    }
-
-    @Test
-    void findAllByTrainerId_shouldReturnEmptyListWhenTrainerHasNoPrograms() {
-        User trainer = userRepository.saveAndFlush(user("trainer", "trainer@example.com", UserRole.TRAINER));
-
-        List<WorkoutProgram> result = workoutProgramRepository.findAllByTrainerId(trainer.getId());
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
     void saveAndFlush_shouldRejectProgramWithoutTrainer() {
         WorkoutProgram program = workoutProgram(null, "Strength Plan", DifficultyLevel.INTERMEDIATE, true);
 
