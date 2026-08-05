@@ -228,6 +228,49 @@ mvn spring-boot:run
 
 The recommended startup order is MySQL, `nutrition-svc`, and then `fitjourney-app`. The main application can still start when `nutrition-svc` is unavailable, but nutrition-specific operations require the microservice.
 
+### Local role setup
+
+Public registration always creates an account with the `USER` role. The registration form does not allow selecting `TRAINER` or `ADMIN`.
+
+For a new local database, the first privileged account must be promoted manually in MySQL. This manual step is only for local setup and course evaluation. After the first `ADMIN` exists, the existing protected admin interface can be used to manage user roles at `/admin/users`.
+
+Select the main application database:
+
+```sql
+USE fitjourney;
+```
+
+Promote a registered account to `ADMIN` by username:
+
+```sql
+UPDATE users
+SET role = 'ADMIN'
+WHERE username = 'your_registered_username';
+```
+
+Promote a registered account to `TRAINER` by username:
+
+```sql
+UPDATE users
+SET role = 'TRAINER'
+WHERE username = 'your_registered_username';
+```
+
+Alternatively, promote a registered account to `ADMIN` by email:
+
+```sql
+UPDATE users
+SET role = 'ADMIN'
+WHERE email = 'your_registered_email@example.com';
+```
+
+Recommended local setup steps:
+
+1. Register the account through the application.
+2. Execute the required `UPDATE` statement in the `fitjourney` database.
+3. Log out and log in again so Spring Security reloads the authorities.
+4. An application restart is not required.
+
 ## 15. Testing
 
 The following results were confirmed against the application code at commit `530a2ed`.
